@@ -1,10 +1,12 @@
 #include <GL/glew.h>
 #include <stdio.h>
 #include <GLFW/glfw3.h>
+#include <WinSock2.h>
 
 
 int main(void)
 {
+
 	GLFWwindow* window;
 
 	/* Initialize the library */
