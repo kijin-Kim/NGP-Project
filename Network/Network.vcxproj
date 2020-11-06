@@ -175,9 +175,11 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Network\Network.h" />
     <ClInclude Include="src\Network\Data.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Network\Network.cpp" />
     <ClCompile Include="src\Network\Data.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
