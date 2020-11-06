@@ -1,9 +1,21 @@
 #include "Network.h"
 
-Network* p_Network = nullptr;
+
 
 Network::Network()
 {
+	WSADATA wsa;
+	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+		ErrQuit(L"WSAStartup() Error");
+
+	SOCKET m_Sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (m_Sock == INVALID_SOCKET)
+		ErrQuit(L"socket()");
+
+	ZeroMemory(&m_ServerAddr, sizeof(m_ServerAddr));
+	m_ServerAddr.sin_family = AF_INET;
+	m_ServerAddr.sin_addr.s_addr = inet_addr(SERVERIP);
+	m_ServerAddr.sin_port = htons(SERVERPORT);
 }
 
 Network::~Network()
@@ -12,14 +24,11 @@ Network::~Network()
 
 Network* Network::GetInstance()
 {
-	if (p_Network == nullptr)
-	{
-		p_Network = new Network;
-	}
-	return p_Network;
+	static Network Instance;
+	return &Instance;
 }
 
-void Network::err_quit(const char* msg)
+void Network::ErrQuit(const wchar_t* msg)
 {
 	LPVOID lpMsgBuf;
 	FormatMessage(
@@ -27,12 +36,12 @@ void Network::err_quit(const char* msg)
 		NULL, WSAGetLastError(),
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 		(LPTSTR)&lpMsgBuf, 0, NULL);
-	MessageBoxA(NULL, (LPCSTR)lpMsgBuf, msg, MB_ICONERROR);
+	MessageBox(NULL, (LPCWSTR)lpMsgBuf, msg, MB_ICONERROR);
 	LocalFree(lpMsgBuf);
 	exit(1);
 }
 
-void Network::err_display(const char* msg)
+void Network::ErrDisplay(const wchar_t* msg)
 {
 	LPVOID lpMsgBuf;
 	FormatMessage(
@@ -40,11 +49,11 @@ void Network::err_display(const char* msg)
 		NULL, WSAGetLastError(),
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 		(LPTSTR)&lpMsgBuf, 0, NULL);
-	printf("[%s] %s", msg, (char*)lpMsgBuf);
+	printf("[%s] %s", msg, lpMsgBuf);
 	LocalFree(lpMsgBuf);
 }
 
-int Network::recvn(SOCKET s, char* buf, int len, int flags)
+int Network::Recvn(SOCKET s, char* buf, int len, int flags)
 {
 	int received;
 	char* ptr = buf;
@@ -63,30 +72,15 @@ int Network::recvn(SOCKET s, char* buf, int len, int flags)
 	return (len - left);
 }
 
-void Network::Init()
+
+void Network::Connect()
 {
-	/*WSADATA wsa;
-	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
-		p_Network->err_quit("WSAStartup() Error");
-
-	SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (sock == INVALID_SOCKET) 
-		p_Network->err_quit("socket()");*/
-
-	ZeroMemory(&p_Network->serveraddr, sizeof(serveraddr));
-	p_Network->serveraddr.sin_family = AF_INET;
-	p_Network->serveraddr.sin_addr.s_addr = inet_addr(SERVERIP);
-	p_Network->serveraddr.sin_port = htons(SERVERPORT);
+	int retval = connect(m_Sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
+	if (retval == SOCKET_ERROR)	ErrQuit(L"connect()");
 }
 
-void Network::Release(SOCKET sock)
+void Network::Release()
 {
-	closesocket(sock);
+	closesocket(m_Sock);
 	WSACleanup();
-}
-
-void Network::Connect(SOCKET sock)
-{
-	int retval = connect(sock, (SOCKADDR*)&p_Network->serveraddr, sizeof(serveraddr));
-	if (retval == SOCKET_ERROR)	p_Network->err_quit("connect()");
 }

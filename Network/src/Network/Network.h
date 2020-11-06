@@ -1,6 +1,4 @@
 #pragma once
-#define _WINSOCK_DEPRECATED_NO_WARNINGS // 최신 VC++ 컴파일 시 경고 방지
-#pragma comment(lib, "ws2_32")
 #include <winsock2.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -11,23 +9,21 @@
 
 class Network
 {
+public:
+	static Network* GetInstance();
+	void Connect();
+	void Release();
+	void ErrQuit(const wchar_t* msg);
+	void ErrDisplay(const wchar_t* msg);
+	int Recvn(SOCKET s, char* buf, int len, int flags);
+
 private:
 	Network();
 	~Network();
 
-public:
-	static Network* GetInstance();
-	static void Init();
-	static void Release(SOCKET sock);
-	static void Connect(SOCKET sock);
-
-	void err_quit(const char* msg);
-	void err_display(const char* msg);
-	int recvn(SOCKET s, char* buf, int len, int flags);
-
 private:
-	//SOCKET sock = INVALID_SOCKET;
-	SOCKADDR_IN serveraddr;
-	int addrlen = sizeof(serveraddr);
+	SOCKET m_Sock;
+	SOCKADDR_IN m_ServerAddr;
+
 };
 
