@@ -65,13 +65,13 @@ int Network::recvn(SOCKET s, char* buf, int len, int flags)
 
 void Network::Init()
 {
-	WSADATA wsa;
+	/*WSADATA wsa;
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
 		p_Network->err_quit("WSAStartup() Error");
 
 	SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (sock == INVALID_SOCKET) 
-		p_Network->err_quit("socket()");
+		p_Network->err_quit("socket()");*/
 
 	ZeroMemory(&p_Network->serveraddr, sizeof(serveraddr));
 	p_Network->serveraddr.sin_family = AF_INET;
@@ -79,14 +79,14 @@ void Network::Init()
 	p_Network->serveraddr.sin_port = htons(SERVERPORT);
 }
 
-void Network::Release()
+void Network::Release(SOCKET sock)
 {
-	closesocket(p_Network->sock);
+	closesocket(sock);
 	WSACleanup();
 }
 
-void Network::Connect()
+void Network::Connect(SOCKET sock)
 {
-	int retval = connect(p_Network->sock, (SOCKADDR*)&p_Network->serveraddr, sizeof(serveraddr));
+	int retval = connect(sock, (SOCKADDR*)&p_Network->serveraddr, sizeof(serveraddr));
 	if (retval == SOCKET_ERROR)	p_Network->err_quit("connect()");
 }

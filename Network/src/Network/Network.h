@@ -18,15 +18,15 @@ private:
 public:
 	static Network* GetInstance();
 	static void Init();
-	static void Release();
-	static void Connect();
+	static void Release(SOCKET sock);
+	static void Connect(SOCKET sock);
 
 	void err_quit(const char* msg);
 	void err_display(const char* msg);
 	int recvn(SOCKET s, char* buf, int len, int flags);
 
 private:
-	SOCKET sock = INVALID_SOCKET;
+	//SOCKET sock = INVALID_SOCKET;
 	SOCKADDR_IN serveraddr;
 	int addrlen = sizeof(serveraddr);
 };
