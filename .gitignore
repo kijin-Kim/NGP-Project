@@ -5,3 +5,4 @@
 *.exe
 Client/bin
 Server/bin
+Network/bin

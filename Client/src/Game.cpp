@@ -5,7 +5,6 @@
 #include <assert.h>
 #include "Renderer.h"
 
-
 Game::Game(int width, int height) :
 	m_Width(width),
 	m_Height(height)
@@ -40,7 +39,6 @@ Game::Game(int width, int height) :
 	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
 	m_Renderer = new Renderer();
-	
 }
 
 Game::~Game()
