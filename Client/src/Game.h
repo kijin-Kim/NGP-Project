@@ -14,7 +14,7 @@ public:
 
 
 private:
-	class GLFWwindow* m_Window = nullptr;
+	struct GLFWwindow* m_Window = nullptr;
 	class Renderer* m_Renderer = nullptr;
 	int m_Width;
 	int m_Height;
