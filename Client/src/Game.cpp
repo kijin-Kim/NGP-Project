@@ -14,7 +14,7 @@ Game::Game(int width, int height) :
 	assert(result && "GLFW를 초기화 하는데 실패하였습니다.");
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	glfwSwapInterval(1);
@@ -60,7 +60,9 @@ void Game::Run()
 	{
 		ProcessInput();
 		/* Render here */
-		m_Renderer->Draw();
+		Renderer::Quad quad = {};
+		quad.Position = glm::vec3(0.5f, 0.5f, 1.0f);
+		m_Renderer->DrawQuad(quad);
 		/* Swap front and back buffers */
 		glfwSwapBuffers(m_Window);
 		/* Poll for and process events */
