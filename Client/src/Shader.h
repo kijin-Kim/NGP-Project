@@ -21,6 +21,24 @@ public:
 		glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
+	void SetVec4(const std::string& name, const glm::vec4& value)
+	{
+		int uniformLocation = glGetUniformLocation(m_ID, name.c_str());
+		if (uniformLocation == -1)
+			assert(false && "Uniform 변수의 위치를 찾는데 실패하였습니다.");
+		glUniform4fv(uniformLocation, 1, glm::value_ptr(value));
+	}
+
+	void SetInt1(const std::string& name, unsigned int value)
+	{
+		int uniformLocation = glGetUniformLocation(m_ID, name.c_str());
+		if (uniformLocation == -1)
+			assert(false && "Uniform 변수의 위치를 찾는데 실패하였습니다.");
+		glUniform1i(uniformLocation, value);
+	}
+
+	
+
 private:
 	std::string readShaderFile(const std::string& filePath);
 	unsigned int compileShader(const std::string& src, unsigned int glShaderType);

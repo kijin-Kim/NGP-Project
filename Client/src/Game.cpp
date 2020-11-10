@@ -38,7 +38,8 @@ Game::Game(int width, int height) :
 	}
 	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
-	m_Renderer = new Renderer();
+	m_Renderer = new Renderer(m_Width, m_Height);
+	testTexture = new Texture("assets/textures/sprite_sheet.png");
 }
 
 Game::~Game()
@@ -61,7 +62,9 @@ void Game::Run()
 		ProcessInput();
 		/* Render here */
 		Renderer::Quad quad = {};
-		quad.Position = glm::vec3(0.5f, 0.5f, 1.0f);
+		quad.Position = glm::vec3(320.0f, 240.0f, 0.0f);
+		quad.Size = glm::vec2(100.0f, 100.0f);
+		quad.Image = testTexture;
 		m_Renderer->DrawQuad(quad);
 		/* Swap front and back buffers */
 		glfwSwapBuffers(m_Window);

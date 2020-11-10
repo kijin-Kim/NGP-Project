@@ -1,4 +1,5 @@
 #pragma once
+#include "Texture.h"
 class Game final
 {
 public:
@@ -18,4 +19,6 @@ private:
 	class Renderer* m_Renderer = nullptr;
 	int m_Width;
 	int m_Height;
+
+	Texture* testTexture = nullptr;
 };

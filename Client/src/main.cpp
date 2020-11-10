@@ -1,7 +1,6 @@
 #include "Game.h"
 #include "Network/Network.h"
 
-
 int main(void)
 {
 	Game* game = new Game(640, 480);
