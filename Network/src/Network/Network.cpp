@@ -1,7 +1,5 @@
 #include "Network.h"
 
-
-
 Network::Network()
 {
 	WSADATA wsa;
@@ -77,6 +75,42 @@ void Network::Connect()
 {
 	int retval = connect(m_Sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
 	if (retval == SOCKET_ERROR)	ErrQuit(L"connect()");
+}
+
+void Network::BindAndListen(int retval)
+{
+	retval = bind(m_Sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
+	if (retval == SOCKET_ERROR) ErrQuit(L"bind()");
+
+	retval = listen(m_Sock, SOMAXCONN);
+	if (retval == SOCKET_ERROR) ErrQuit(L"listen()");
+}
+
+void Network::Accept()
+{
+	addrlen = sizeof(m_ClientAddr);
+	m_ClientSock = accept(m_Sock, (SOCKADDR*)&m_ClientAddr, &addrlen);
+	if (m_ClientSock == INVALID_SOCKET) ErrDisplay(L"accept()");
+}
+
+void Network::SendData(int retval)
+{
+	//임시 SendData
+	retval = send(m_Sock, buf, strlen(buf), 0);
+	if (retval == SOCKET_ERROR) {
+		ErrDisplay(L"send()");	
+	}
+}
+
+void Network::RecvData(int retval)
+{
+	//임시 RecvData
+	retval = Recvn(m_ClientSock, buf, retval, 0);
+	if (retval == SOCKET_ERROR) {
+		ErrDisplay(L"recv fixed()");
+		exit(1);
+	}
+
 }
 
 void Network::Release()
