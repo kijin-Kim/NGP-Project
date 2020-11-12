@@ -23,7 +23,6 @@ std::queue<EVENT> eventQueues[5];//클라의 이벤트를 받는 큐
 int queueSizes[5];//각 큐에 현재 삽입이 완료된 이벤트의 개수
 int curClientNumber = 0;//현재 접속한 클라의 숫자
 DWORD clientNoEventTime[5];
-DWORD preEventTime[5];
 
 
 //Send관련
@@ -87,7 +86,6 @@ int recvn(SOCKET s, char* buf, int len, int flags)
 	return (len - left);
 }
 
-DWORD WINAPI ListeningThread(LPVOID arg);
 DWORD WINAPI LogicThread(LPVOID arg);
 
 void InitServer()
@@ -96,6 +94,10 @@ void InitServer()
 	WSAStartup(MAKEWORD(2, 2), &wsa);
 
 	int retval = 0;
+
+	ZeroMemory(sendEvents, sizeof(HANDLE) * 5);
+	ZeroMemory(sendQueueSizes, sizeof(int) * 5);
+
 
 	// socket()
 	SOCKET listen_sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -113,6 +115,10 @@ void InitServer()
 	SOCKADDR_IN clientaddr;
 	HANDLE hThread = NULL;
 	int addrlen;
+
+	//listen()
+	retval = listen(listen_sock, SOMAXCONN);
+	if (retval == SOCKET_ERROR)err_quit("listen()");
 	
 	while (1) {
 		// accept()
@@ -126,9 +132,18 @@ void InitServer()
 		printf("[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d\n",
 			inet_ntoa(clientaddr.sin_addr), ntohs(clientaddr.sin_port));
 
+		if (hThread == NULL) { closesocket(client_sock); }
+		else
+		{
+			if (curClientNumber == 0)
+			{
+				//첫 클라이언트 접속 시 로직 쓰레드 한번만 생성
+				HANDLE logicThread = CreateThread(NULL, 0, LogicThread, (LPVOID)client_sock, 0, NULL);
+				if (logicThread)
+					CloseHandle(logicThread);
+			}
+		}
 
-		//LogicThread 스레드 생성
-		//hThread = CreateThread(NULL, 0, LogicThread, (LPVOID)&clientsock, 0, NULL);
 
 	}
 }
