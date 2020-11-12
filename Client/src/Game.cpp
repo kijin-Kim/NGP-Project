@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "Renderer.h"
+#include "TextureManager.h"
 
 Game::Game(int width, int height) :
 	m_Width(width),
@@ -39,7 +40,13 @@ Game::Game(int width, int height) :
 	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
 	m_Renderer = new Renderer(m_Width, m_Height);
-	testTexture = new Texture("assets/textures/sprite_sheet.png");
+
+	TextureManager* textureManager = TextureManager::GetInstance();
+
+	textureManager->LoadTexture("assets/textures/sprite_sheet.png", "sprite");
+	textureManager->LoadTextureAtlas("assets/textures/sprite_sheet.json");
+
+	testTexture = textureManager->GetTexture("sprite");
 }
 
 Game::~Game()

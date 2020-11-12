@@ -8,7 +8,7 @@
 class Texture
 {
 public:
-	Texture(const std::string& filePath, const std::string& spriteSheetJson)
+	Texture(const std::string& filePath, int subWidth = 0, int subHeight = 0)
 	{
 		unsigned int m_ID;
 		glGenTextures(1, &m_ID);
@@ -26,8 +26,11 @@ public:
 		{
 			assert(false && "텍스쳐를 로드하는데 실패하였습니다.");
 		}
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		//glGenerateMipmap(GL_TEXTURE_2D);
+		
+		if(subWidth == 0 || subHeight == 0)
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		else
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, subWidth, subHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		
 		stbi_image_free(data);
 	}
