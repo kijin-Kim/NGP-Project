@@ -6,13 +6,16 @@ Network::Network()
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
 		ErrQuit(L"WSAStartup() Error");
 
-	SOCKET m_Sock = socket(AF_INET, SOCK_STREAM, 0);
+	m_Sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (m_Sock == INVALID_SOCKET)
 		ErrQuit(L"socket()");
 
 	ZeroMemory(&m_ServerAddr, sizeof(m_ServerAddr));
 	m_ServerAddr.sin_family = AF_INET;
-	m_ServerAddr.sin_addr.s_addr = inet_addr(SERVERIP);
+	if (isServer == false)
+		m_ServerAddr.sin_addr.s_addr = inet_addr(SERVERIP);
+	if (isServer == true)
+		m_ServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	m_ServerAddr.sin_port = htons(SERVERPORT);
 }
 

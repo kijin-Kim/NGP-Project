@@ -22,6 +22,7 @@ public:
 	void ErrDisplay(const wchar_t* msg);
 	int Recvn(SOCKET s, char* buf, int len, int flags);
 
+	bool isServer;
 private:
 	Network();
 	~Network();
