@@ -15,7 +15,6 @@
 
 using namespace std;
 
-
 //Recv 관련
 HANDLE recvEvents[5] = {};//Recv 관련 Event 객체 핸들
 HANDLE sendEvents[5];//Send 관련 Event 객체 핸들
