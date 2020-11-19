@@ -34,7 +34,7 @@ public:
 		if (!bIsOk)
 			assert(false && "Json File을 파싱하는데 실패하였습니다.");
 
-		auto a = value["frames"]
+		
 		/*for (int i = 0; i < value["frames"].size(); i++)
 		{
 			std::cout << value["frames"][i].asCString() << std::endl;
