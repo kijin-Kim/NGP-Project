@@ -10,19 +10,16 @@ class TextureManager final
 public:
 	static TextureManager* GetInstance() { static TextureManager instance; return &instance; }
 
-	void LoadTexture(const std::string& texturePath, const std::string& alias = "")
+	void LoadTexture(const std::string& texturePath)
 	{
-		std::string textureAlias;
-		textureAlias = alias == "" ? texturePath : alias;
-		if (m_TextureCache.find(textureAlias) != m_TextureCache.end())
+		if (m_TextureCache.find(texturePath) != m_TextureCache.end())
 		{
 			return;
 		}
-
-		m_TextureCache[textureAlias] = new Texture(texturePath);
+		m_TextureCache[texturePath] = new Texture(texturePath);
 	}
 
-	void LoadTextureAtlas(const std::string& jsonFilePath)
+	void LoadTextureAtlas(const std::string& jsonFilePath, const std::string& filePath)
 	{
 		std::ifstream jsonFile(jsonFilePath);
 		Json::CharReaderBuilder builder;
@@ -34,29 +31,22 @@ public:
 		if (!bIsOk)
 			assert(false && "Json File을 파싱하는데 실패하였습니다.");
 
-		
-		/*for (int i = 0; i < value["frames"].size(); i++)
+
+		int width, height, nrChannels;
+		stbi_set_flip_vertically_on_load(true);
+		unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &nrChannels, 0);
+		if (!data)
 		{
-			std::cout << value["frames"][i].asCString() << std::endl;
-		}*/
-		
+			assert(false && "텍스쳐를 로드하는데 실패하였습니다.");
+		}
 
-
-		/*if (bIsOk)
+		for (int i = 0; i < value.size(); i++)
 		{
-			for (int i = 0; i < value["Actors"].size(); i++)
-			{
-				std::string actorType = value["Actors"][i]["ActorType"].asString();
-				auto* actor = s_ActorCreationMap[actorType](renderer, layer, value);
-				layer->GetWorld().push_back(actor);
+			m_TextureCache[value[i]["name"].asString()] = new Texture(data, value[i]["frame"]["x"].asInt(), value[i]["frame"]["y"].asInt(),
+				value[i]["frame"]["w"].asInt(), value[i]["frame"]["h"].asInt());
+		}
 
-				for (int j = 0; j < value["Actors"][i]["Components"].size(); j++)
-				{
-					std::string componentType = value["Actors"][i]["Components"][j]["ComponentType"].asString();
-					s_ComponentCreationMap[componentType](actor, value["Actors"][i]["Components"][j]["ComponentProperties"]);
-				}
-			}
-		}*/
+		stbi_image_free(data);
 	}
 
 	Texture* GetTexture(const std::string& alias)

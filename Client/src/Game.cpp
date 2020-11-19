@@ -43,10 +43,10 @@ Game::Game(int width, int height) :
 
 	TextureManager* textureManager = TextureManager::GetInstance();
 
-	textureManager->LoadTexture("assets/textures/sprite_sheet.png", "sprite");
-	textureManager->LoadTextureAtlas("assets/textures/sprite_sheet.json");
+	textureManager->LoadTexture("assets/textures/sprite_sheet.png");
+	textureManager->LoadTextureAtlas("assets/textures/sprite_sheet.json", "assets/textures/sprite_sheet.png");
 
-	testTexture = textureManager->GetTexture("sprite");
+	testTexture = textureManager->GetTexture("ball/ball_0.png");
 }
 
 Game::~Game()
