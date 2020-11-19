@@ -96,7 +96,7 @@ void Network::Accept()
 	if (m_ClientSock == INVALID_SOCKET) ErrDisplay(L"accept()");
 }
 
-void Network::SendData(int retval)
+void Network::SendData(int retval, char* buf)
 {
 	//임시 SendData
 	retval = send(m_Sock, buf, strlen(buf), 0);
@@ -105,7 +105,7 @@ void Network::SendData(int retval)
 	}
 }
 
-void Network::RecvData(int retval)
+void Network::RecvData(int retval, char* buf)
 {
 	//임시 RecvData
 	retval = Recvn(m_ClientSock, buf, retval, 0);

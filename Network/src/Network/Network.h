@@ -16,8 +16,8 @@ public:
 	void Accept();
 	void Connect();
 	void Release();
-	void SendData(int retval);
-	void RecvData(int retval);
+	void SendData(int retval, char* buf);
+	void RecvData(int retval, char* buf);
 	void ErrQuit(const wchar_t* msg);
 	void ErrDisplay(const wchar_t* msg);
 	int Recvn(SOCKET s, char* buf, int len, int flags);
@@ -27,10 +27,14 @@ private:
 	Network();
 	~Network();
 
-private:
-	SOCKET m_Sock, m_ClientSock;
-	SOCKADDR_IN m_ServerAddr;
+public:
+	SOCKET m_ClientSock;
 	SOCKADDR_IN m_ClientAddr;
+
+private:
+	SOCKET m_Sock;
+	SOCKADDR_IN m_ServerAddr;
+	
 	char buf[BUFSIZE + 1];
 	int addrlen;
 };

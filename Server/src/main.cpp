@@ -8,6 +8,12 @@ int main()
 	network->isServer = true;
 	network->BindAndListen(retval);
 
-	network->Accept();
+	while (1)
+	{
+		network->Accept();
+		printf("\n[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d\n",
+			inet_ntoa(network->m_ClientAddr.sin_addr), ntohs(network->m_ClientAddr.sin_port));
+	}
+	
 	network->Release();
 }
