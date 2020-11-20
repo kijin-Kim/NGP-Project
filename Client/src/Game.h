@@ -1,5 +1,8 @@
 #pragma once
+#include <queue>
 #include "Texture.h"
+#include "Network/Data.h"
+
 class Game final
 {
 public:
@@ -19,6 +22,8 @@ private:
 	class Renderer* m_Renderer = nullptr;
 	int m_Width;
 	int m_Height;
+
+	std::queue<UserInput> m_InputQueue;
 
 	Texture* testTexture = nullptr;
 };

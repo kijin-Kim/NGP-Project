@@ -5,6 +5,8 @@
 #include <assert.h>
 #include "Renderer.h"
 
+#include <iostream>
+
 Game::Game(int width, int height) :
 	m_Width(width),
 	m_Height(height)
@@ -28,6 +30,17 @@ Game::Game(int width, int height) :
 	/* Make the window's context current */
 	glfwMakeContextCurrent(m_Window);
 
+
+	glfwSetWindowUserPointer(m_Window, &m_InputQueue);
+	glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+		{
+			std::queue<UserInput>* inputQueue = (std::queue<UserInput>*)glfwGetWindowUserPointer(window);
+			UserInput input = {};
+			input.Key = key;
+			input.Action = action;
+			inputQueue->push(input);
+		});
+
 	
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
@@ -50,8 +63,22 @@ Game::~Game()
 
 void Game::ProcessInput()
 {
-	if (glfwGetKey(m_Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(m_Window, true);
+	UserInput input = {};
+	input.Key = GLFW_KEY_UNKNOWN;
+	
+	if (m_InputQueue.empty())
+	{
+		// Send Empty Input
+	}
+	else
+	{
+		input = m_InputQueue.front();
+
+		// Send User Input
+
+		m_InputQueue.pop();
+	}
+		
 }
 
 void Game::Run()

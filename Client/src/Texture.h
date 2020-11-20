@@ -8,7 +8,7 @@
 class Texture
 {
 public:
-	Texture(const std::string& filePath, const std::string& spriteSheetJson)
+	Texture(const std::string& filePath)
 	{
 		unsigned int m_ID;
 		glGenTextures(1, &m_ID);
@@ -30,6 +30,7 @@ public:
 		//glGenerateMipmap(GL_TEXTURE_2D);
 		
 		stbi_image_free(data);
+		
 	}
 
 	~Texture()
