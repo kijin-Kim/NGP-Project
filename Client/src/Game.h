@@ -1,6 +1,6 @@
 #pragma once
 #include <queue>
-#include "Texture.h"
+#include "TextureData.h"
 #include "Network/Data.h"
 
 class Game final
@@ -25,5 +25,5 @@ private:
 
 	std::queue<UserInput> m_InputQueue;
 
-	Texture* testTexture = nullptr;
+	Texture testTexture = {};
 };

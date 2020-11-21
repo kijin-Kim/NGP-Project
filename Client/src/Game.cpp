@@ -59,7 +59,9 @@ Game::Game(int width, int height) :
 	textureManager->LoadTexture("assets/textures/sprite_sheet.png");
 	textureManager->LoadTextureAtlas("assets/textures/sprite_sheet.json", "assets/textures/sprite_sheet.png");
 
-	testTexture = textureManager->GetTexture("ball/ball_0.png");
+
+	//testTexture = textureManager->GetTexture("assets/textures/sprite_sheet.png");
+	testTexture = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "messages/ko/pikachu_volleyball.png");
 }
 
 Game::~Game()
@@ -97,7 +99,6 @@ void Game::Run()
 		/* Render here */
 		Renderer::Quad quad = {};
 		quad.Position = glm::vec3(320.0f, 240.0f, 0.0f);
-		quad.Size = glm::vec2(100.0f, 100.0f);
 		quad.Image = testTexture;
 		m_Renderer->DrawQuad(quad);
 		/* Swap front and back buffers */

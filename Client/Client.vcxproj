@@ -196,7 +196,7 @@ copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDi
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Shader.h" />
-    <ClInclude Include="src\Texture.h" />
+    <ClInclude Include="src\TextureData.h" />
     <ClInclude Include="src\TextureManager.h" />
   </ItemGroup>
   <ItemGroup>

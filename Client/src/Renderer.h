@@ -1,6 +1,6 @@
 #pragma once
 #include "Shader.h"
-#include "Texture.h"
+#include "TextureManager.h"
 #include <glm/glm.hpp>
 
 class Renderer final
@@ -9,8 +9,7 @@ public:
 	struct Quad
 	{
 		glm::vec2 Position = glm::vec2(0.0f, 0.0f);
-		glm::vec2 Size = glm::vec2(1.0f, 1.0f);
-		Texture* Image = nullptr;
+		Texture Image = {};
 		unsigned int RenderOrder = 0;
 	};
 
@@ -18,25 +17,28 @@ public:
 	Renderer(int width, int height)
 	{
 		m_Shader = new Shader("assets/shaders/VertexShader.glsl", "assets/shaders/FragmentShader.glsl");
-		const float quadVertices[] = {
+
+		float quadVertices[12] = {
 			-0.5f,  0.5f, 0.0f,
 			 0.5f,  0.5f, 0.0f,
 			 0.5f, -0.5f, 0.0f,
 			-0.5f, -0.5f, 0.0f
 		};
-		const unsigned int quadIndices[] = {
+		unsigned int quadIndices[6] = {
 			0, 2, 1,
 			0, 3, 2
 		};
 
-		const float quadTexCoord[] = {
+		float quadTexCoord[8] = {
 			 0.0f, 1.0f,
 			 1.0f, 1.0f,
 			 1.0f, 0.0f,
 			 0.0f, 0.0f
 		};
 
+
 		glGenBuffers(3, m_BufferIDs);
+
 		glBindBuffer(GL_ARRAY_BUFFER, m_BufferIDs[0]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -83,10 +85,18 @@ public:
 			0,                  
 			(void*)0
 		);
+
+
+
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 
+
+
 		glBindVertexArray(0);
+
+
+
 
 
 		m_ProjMat = glm::ortho(0.0f, (float)width, 0.0f, (float)height, -1.0f, 1.0f);
@@ -114,15 +124,37 @@ public:
 		glm::mat4x4 modelMat = glm::mat4x4(1.0f);
 		float depth = quad.RenderOrder / 10.0f;
 		modelMat = glm::translate(modelMat, glm::vec3(quad.Position, depth));
-		modelMat = glm::scale(modelMat, glm::vec3(quad.Size, 1.0f));
+		modelMat = glm::scale(modelMat, glm::vec3(200.0f,200.0f, 1.0f));
+		
 
-		m_Shader->SetMat4("u_Model", modelMat);
 
-		if (quad.Image)
+
+
+		Texture image = quad.Image;
+		if (image.Data)
 		{
-			quad.Image->Bind(0);
+			image.Data->Bind(0);
+			modelMat = glm::scale(modelMat, glm::vec3(image.W /(float)(image.H + image.W), image.H / (float)(image.H + image.W), 1.0f));
+			m_Shader->SetMat4("u_Model", modelMat);
+
+			if (image.W != 0 || image.H != 0)
+			{
+				float quadTexCoord[8] = {
+					image.X / (float)image.IW, image.Y / (float)image.IH,
+					(image.X + image.W) / (float)image.IW, image.Y / (float)image.IH,
+					(image.X + image.W) / (float)image.IW, (image.Y - image.H) / (float)image.IH,
+					image.X / (float)image.IW, (image.Y - image.H) / (float)image.IH
+				};
+				glBindBuffer(GL_ARRAY_BUFFER, m_BufferIDs[2]);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(quadTexCoord), quadTexCoord, GL_STATIC_DRAW);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+			}
 			m_Shader->SetInt1("u_Texture", 0);
 		}
+
+		
+
 
 		glBindVertexArray(m_VertexArrayID);
 
