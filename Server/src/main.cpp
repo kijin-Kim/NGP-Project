@@ -18,18 +18,24 @@ using namespace std;
 //Recv 관련
 HANDLE recvEvents[5] = {};//Recv 관련 Event 객체 핸들
 HANDLE sendEvents[5];//Send 관련 Event 객체 핸들
-std::queue<EVENT> eventQueues[5];//클라의 이벤트를 받는 큐
+queue<EVENT> eventQueues[5];//클라의 이벤트를 받는 큐
 int queueSizes[5];//각 큐에 현재 삽입이 완료된 이벤트의 개수
 int curClientNumber = 0;//현재 접속한 클라의 숫자
 DWORD clientNoEventTime[5];
-
 
 //Send관련
 char buffer[100000];//서버에서 딱 하나만 사용하는 전송용 버퍼
 int bufOffset = 0;//버퍼에 넣은 바이트 수
 SOCKET client_socket[5];
-std::queue<char*> senfQueues[5];//보내는 큐
+queue<char*> sendQueues[5];//보내는 큐
 int sendQueueSizes[5];
+
+
+struct EVENT
+{
+	// 이벤트 비트플래그
+	unsigned short eventFlag;
+};
 
 
 struct CLIENT_SOCKET
@@ -131,6 +137,11 @@ void InitServer()
 		printf("[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d\n",
 			inet_ntoa(clientaddr.sin_addr), ntohs(clientaddr.sin_port));
 
+		CLIENT_SOCKET clientSock;
+		clientSock.s = client_sock;
+		clientSock.clientNum = curClientNumber;
+		
+
 		if (hThread == NULL) { closesocket(client_sock); }
 		else
 		{
@@ -142,7 +153,13 @@ void InitServer()
 					CloseHandle(logicThread);
 			}
 		}
+		recvEvents[curClientNumber] = CreateEvent(NULL, FALSE, FALSE, NULL);
+		sendEvents[curClientNumber] = CreateEvent(NULL, FALSE, FALSE, NULL);
 
+		client_socket[curClientNumber] = client_sock;
+		//클라이언트 접속 성공
+		curClientNumber++;
+		CloseHandle(hThread);
 
 	}
 }
@@ -150,48 +167,86 @@ void InitServer()
 
 DWORD LogicThread(LPVOID arg)
 {
-	while (1) {
+
+
+	while (1)
+	{
 		//WaitForMultiple
 		WaitForMultipleObjects(curClientNumber, recvEvents, TRUE, 10);
-		for (int i = 0; i < curClientNumber; ++i) {
-			if (queueSizes[i] && !eventQueues[i].empty()) {//큐에 어떤 이벤트가 삽인된게 하나라도 있다면
+
+		for (int i = 0; i < curClientNumber; ++i)
+		{
+			if (queueSizes[i] && !eventQueues[i].empty()) 
+			{//큐에 어떤 이벤트가 삽인된게 하나라도 있다면
 				EVENT curEvent = eventQueues[i].front();//이벤트를 먼저 받아놓고 다음 줄에서 pop
 				eventQueues[i].pop();
+
+				queueSizes[i]--;
 			}
 		}
 
+
+		//버퍼를 채운다.
 		for (int i = 0; i < curClientNumber; ++i)
 		{
 		}
 
-		for (int i = 0; i < curClientNumber; ++i)
-			SetEvent(sendEvents[i]);
+		//버퍼 채우기가 끝나면
+		//완료된 버퍼를 보낸다(send)
 
-		ZeroMemory(buffer, 100000);
+		for (int i = 0; i < curClientNumber; ++i)
+		{
+			char* pNew = new char[bufOffset + 8];
+			memcpy(pNew, &bufOffset, 4);//버퍼 사이즈 담기
+			memcpy(pNew + 4, buffer, bufOffset);//버퍼 내용 담기
+
+			sendQueues[i].push(pNew);
+			sendQueueSizes[i]++;
+		}
+
+		for (int i = 0; i < curClientNumber; ++i)
+		{
+			SetEvent(sendEvents[i]);
+		}
+		ZeroMemory(buffer, 1000000);
 		bufOffset = 0;
+
 	}
 
 	return 0;
 }
 
-DWORD SentThread(LPVOID arg)
+DWORD SendThread(LPVOID arg)
 {
 	CLIENT_SOCKET sockStruct = *((CLIENT_SOCKET*)arg);
-	SOCKET client_sock = sockStruct s;
+	SOCKET client_sock = sockStruct.s;
 	int myNumber = sockStruct.clientNum;
 
 	while (1)
 	{
 		WaitForSingleObject(sendEvents[myNumber], INFINITE);
 
-		if (sendQueueSizes[myNumber] && !senfQueues[myNumber].empty());
+		if (sendQueueSizes[myNumber] && !sendQueues[myNumber].empty());
 		{
-			char* pCurBuffer = senfQueues[myNumber].front();
-			senfQueues[myNumber].pop();
+			char* pCurBuffer = sendQueues[myNumber].front();
+			sendQueues[myNumber].pop();
 
 			int tmpBuffOffset = 0;
 			memcpy(&tmpBuffOffset, pCurBuffer, sizeof(int));
 
+			//먼저 offset(버퍼의 찬 Size)를 보낸다.
+			send(client_socket[myNumber], (char*)&tmpBuffOffset, 4, 0);
+
+			//클라번호도 보낸다
+			send(client_socket[myNumber], (char*)&myNumber, 4, 0);
+
+			//Buffer를 send
+			send(client_socket[myNumber], pCurBuffer +4, tmpBuffOffset, 0);
+
+			sendQueueSizes[myNumber]--;
+			delete[] pCurBuffer;
+
 		}
 	}
+	return 0;
 }
