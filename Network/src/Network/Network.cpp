@@ -76,11 +76,17 @@ int Network::Recvn(SOCKET s, char* buf, int len, int flags)
 
 void Network::Connect()
 {
-	int retval = connect(m_Sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
+	retval = connect(m_Sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
 	if (retval == SOCKET_ERROR)	ErrQuit(L"connect()");
 }
 
-void Network::BindAndListen(int retval)
+void Network::ClientInfo()
+{
+	addrlen = sizeof(m_ClientAddr);
+	getpeername(m_ClientSock, (SOCKADDR*)&m_ClientAddr, &addrlen);
+}
+
+void Network::BindAndListen()
 {
 	retval = bind(m_Sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
 	if (retval == SOCKET_ERROR) ErrQuit(L"bind()");
@@ -96,28 +102,40 @@ void Network::Accept()
 	if (m_ClientSock == INVALID_SOCKET) ErrDisplay(L"accept()");
 }
 
-void Network::SendData(int retval, char* buf)
+void Network::ServerSend(char* buf)
 {
 	//임시 SendData
-	retval = send(m_Sock, buf, strlen(buf), 0);
-	if (retval == SOCKET_ERROR) {
-		ErrDisplay(L"send()");	
-	}
+	retval = send(m_ClientSock, buf, BUFSIZE, 0);
+	/*if (retval == SOCKET_ERROR) {
+		ErrDisplay(L"send()");
+	}*/
 }
 
-void Network::RecvData(int retval, char* buf)
+void Network::ClientSend(char* buf)
+{
+	//임시 SendData
+	retval = send(m_Sock, buf, BUFSIZE, 0);
+}
+
+void Network::ServerRecv(char* buf)
 {
 	//임시 RecvData
-	retval = Recvn(m_ClientSock, buf, retval, 0);
-	if (retval == SOCKET_ERROR) {
+	retval = recv(m_ClientSock, buf, BUFSIZE , 0);
+}
+
+void Network::ClientRecv(char* buf)
+{
+	//임시 RecvData
+	retval = Recvn(m_Sock, buf, BUFSIZE, 0);
+	/*if (retval == SOCKET_ERROR) {
 		ErrDisplay(L"recv fixed()");
 		exit(1);
 	}
-
+	else if (retval == 0)
+		ErrDisplay(L"recv retval = 0 ()");*/
 }
-
-void Network::Release()
+void Network::Release(SOCKET sock)
 {
-	closesocket(m_Sock);
+	closesocket(sock);
 	WSACleanup();
 }

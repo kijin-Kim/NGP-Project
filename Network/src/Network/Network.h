@@ -6,18 +6,21 @@
 
 #define SERVERIP   "127.0.0.1"
 #define SERVERPORT 9000
-#define BUFSIZE    512
+#define BUFSIZE    50
 
 class Network
 {
 public:
 	static Network* GetInstance();
-	void BindAndListen(int retval);
+	void BindAndListen();
 	void Accept();
 	void Connect();
-	void Release();
-	void SendData(int retval, char* buf);
-	void RecvData(int retval, char* buf);
+	void ClientInfo();
+	void Release(SOCKET sock);
+	void ServerSend(char* buf);
+	void ClientSend(char* buf);
+	void ServerRecv(char* buf);
+	void ClientRecv(char* buf);
 	void ErrQuit(const wchar_t* msg);
 	void ErrDisplay(const wchar_t* msg);
 	int Recvn(SOCKET s, char* buf, int len, int flags);
@@ -29,13 +32,12 @@ private:
 
 public:
 	SOCKET m_ClientSock;
+	SOCKET m_Sock;
 	SOCKADDR_IN m_ClientAddr;
+	int retval;
 
 private:
-	SOCKET m_Sock;
 	SOCKADDR_IN m_ServerAddr;
-	
-	char buf[BUFSIZE + 1];
 	int addrlen;
 };
 
