@@ -2,7 +2,8 @@
 #include <queue>
 #include "TextureData.h"
 #include "Network/Data.h"
-#include "State.h"
+
+class State;
 
 class Game
 {
@@ -11,14 +12,14 @@ public:
 	virtual ~Game();
 
 	bool ConnectToServer() {}
-	void ProcessInput();
-	void SendDataToServer() {}
-	void RecieveDataFromServer() {}
 	void Run();
 
+
+	std::queue<UserInput>& GetInputQueue() { return m_InputQueue; }
 protected:
-	State* GetState() const { return m_State; }
-	void SetState(State* state) { m_State = state; }
+	State* GetState() const;
+	void SetState(State* state);
+	
 
 	
 private:
@@ -29,7 +30,7 @@ private:
 
 	std::queue<UserInput> m_InputQueue;
 
-	State* m_State = nullptr;
+	State* m_State;
 };
 
 Game* CreateGameApplication();

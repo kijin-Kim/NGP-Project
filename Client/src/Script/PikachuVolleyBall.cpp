@@ -6,7 +6,7 @@
 class GameState : public State
 {
 public:
-	GameState()
+	GameState(Game* game) : State(game)
 	{
 		TextureManager* textureManager = TextureManager::GetInstance();
 		Texture skyBlueTile = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "objects/sky_blue.png");
@@ -78,6 +78,28 @@ public:
 
 	virtual ~GameState() = default;
 
+
+	virtual void SendData() override
+	{
+		UserInput input = {};
+		auto inputQueue = m_Game->GetInputQueue();
+		input.Key = -1;
+		if (inputQueue.empty())
+		{
+			// Send Empty Input
+		}
+		else
+		{
+			input = inputQueue.front();
+			// Send User Input
+			inputQueue.pop();
+		}
+	}
+	virtual void ReceiveData() override
+	{
+
+	}
+
 	virtual void Render() override
 	{
 		Renderer::RegisterQuads(m_SceneQuads, _countof(m_SceneQuads));
@@ -90,6 +112,8 @@ private:
 	Renderer::Quad m_NetQuads[12];
 	Renderer::Quad m_ObjectsQuad[3];
 
+
+	ServerToClientInGame m_Data;
 };
 
 
@@ -102,7 +126,7 @@ public:
 		TextureManager* textureManager = TextureManager::GetInstance();
 		textureManager->LoadTextureAtlas("assets/textures/sprite_sheet.json", "assets/textures/sprite_sheet.png");
 
-		SetState(new GameState());
+		SetState(new GameState(this));
 	}
 	virtual ~PickachuVolleyBall() = default;
 

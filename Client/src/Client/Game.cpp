@@ -5,6 +5,7 @@
 #include <assert.h>
 #include "Renderer.h"
 #include "TextureManager.h"
+#include "State.h"
 
 #include <iostream>
 
@@ -63,43 +64,34 @@ Game::~Game()
 	glfwTerminate();
 }
 
-void Game::ProcessInput()
-{
-	UserInput input = {};
-	input.Key = GLFW_KEY_UNKNOWN;
-	
-	if (m_InputQueue.empty())
-	{
-		// Send Empty Input
-	}
-	else
-	{
-		input = m_InputQueue.front();
-
-		// Send User Input
-
-		m_InputQueue.pop();
-	}
-}
-
 void Game::Run()
 {
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(m_Window))
 	{
-		ProcessInput();
 		/* Render here */
-
-		if (GetState())
-			GetState()->Render();
+		if (m_State)
+		{
+			m_State->SendData();
+			m_State->ReceiveData();
+			m_State->Render();
+		}
 
 		m_Renderer->Draw();
-
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(m_Window);
 		/* Poll for and process events */
 		glfwPollEvents();
-
 	}
+}
+
+State* Game::GetState() const
+{
+	return m_State;
+}
+
+void Game::SetState(State* state)
+{
+	m_State = state;
 }
