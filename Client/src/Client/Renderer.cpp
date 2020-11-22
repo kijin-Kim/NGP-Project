@@ -119,16 +119,16 @@ void Renderer::DrawQuad(const Quad& quad)
 	m_Shader->Bind();
 	m_Shader->SetMat4("u_Proj", m_ProjMat);
 
-
 	glm::mat4x4 modelMat = glm::mat4x4(1.0f);
 	modelMat = glm::translate(modelMat, glm::vec3(quad.Position, 0.0f));
 
 	Texture image = quad.Image;
-	if (image.Data)
+	if (quad.bUseTexture && image.Data)
 	{
+		m_Shader->SetInt1("u_bToggleTexture", 1);
+
 		image.Data->Bind(0);
 		modelMat = glm::scale(modelMat, glm::vec3(image.W, image.H, 1.0f));
-		m_Shader->SetMat4("u_Model", modelMat);
 
 		if (image.W != 0 || image.H != 0)
 		{
@@ -159,9 +159,36 @@ void Renderer::DrawQuad(const Quad& quad)
 			
 
 		}
-
 		m_Shader->SetInt1("u_Texture", 0);
 	}
+	else
+	{
+		m_Shader->SetInt1("u_bToggleTexture", 0);
+	}
+
+
+	if (quad.bUseColor)
+	{
+		m_Shader->SetInt1("u_bToggleColor", 1);
+		m_Shader->SetVec4("u_Color", quad.Color);
+		
+		if(!quad.bUseTexture)
+			modelMat = glm::scale(modelMat, glm::vec3(quad.Size.x, quad.Size.y, 1.0f));
+	}
+	else
+		m_Shader->SetInt1("u_bToggleColor", 0);
+
+	m_Shader->SetMat4("u_Model", modelMat);
+
+
+	//else
+	//{
+	//	// NO IMAGE
+	//	modelMat = glm::scale(modelMat, glm::vec3(quad.Size.x, quad.Size.y, 1.0f));
+
+	//}
+
+
 
 	glBindVertexArray(m_VertexArrayID);
 

@@ -11,7 +11,14 @@ public:
 	struct Quad
 	{
 		glm::vec2 Position = glm::vec2(0.0f, 0.0f);
+
+		bool bUseTexture = true;
 		Texture Image = {};
+
+		bool bUseColor = false;
+		glm::vec4 Color = glm::vec4(1.0f, 1.0f, 1.0, 1.0f);
+		glm::vec2 Size = glm::vec2(1.0f, 1.0f);
+
 		bool bShouldFlipVertical = false;
 	};
 
