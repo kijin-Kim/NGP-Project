@@ -2,21 +2,25 @@
 #include <queue>
 #include "TextureData.h"
 #include "Network/Data.h"
+#include "State.h"
 
-class Game final
+class Game
 {
 public:
 	Game(int width, int height);
-	~Game();
+	virtual ~Game();
 
 	bool ConnectToServer() {}
-
 	void ProcessInput();
 	void SendDataToServer() {}
 	void RecieveDataFromServer() {}
 	void Run();
 
+protected:
+	State* GetState() const { return m_State; }
+	void SetState(State* state) { m_State = state; }
 
+	
 private:
 	struct GLFWwindow* m_Window = nullptr;
 	class Renderer* m_Renderer = nullptr;
@@ -25,5 +29,9 @@ private:
 
 	std::queue<UserInput> m_InputQueue;
 
-	Texture testTexture = {};
+	State* m_State = nullptr;
 };
+
+Game* CreateGameApplication();
+
+#define RegisterApplication(x, width, height) Game* CreateGameApplication() { return new x(width, height); }

@@ -24,7 +24,7 @@ Game::Game(int width, int height) :
 
 	/* Create a windowed mode window and its OpenGL context */
 
-	m_Window = glfwCreateWindow(m_Width, m_Height, "Hello World", NULL, NULL);
+	m_Window = glfwCreateWindow(m_Width, m_Height, "Pickachu VolleyBall", NULL, NULL);
 	assert(m_Window && "GLFW Window를 생성하는데 실패하였습니다.");
 
 
@@ -54,19 +54,12 @@ Game::Game(int width, int height) :
 
 	m_Renderer = new Renderer(m_Width, m_Height);
 
-	TextureManager* textureManager = TextureManager::GetInstance();
-
-	textureManager->LoadTexture("assets/textures/sprite_sheet.png");
-	textureManager->LoadTextureAtlas("assets/textures/sprite_sheet.json", "assets/textures/sprite_sheet.png");
-
-
-	//testTexture = textureManager->GetTexture("assets/textures/sprite_sheet.png");
-	testTexture = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "messages/ko/pikachu_volleyball.png");
 }
 
 Game::~Game()
 {
 	delete m_Renderer;
+	delete GetState();
 	glfwTerminate();
 }
 
@@ -87,7 +80,6 @@ void Game::ProcessInput()
 
 		m_InputQueue.pop();
 	}
-		
 }
 
 void Game::Run()
@@ -97,10 +89,13 @@ void Game::Run()
 	{
 		ProcessInput();
 		/* Render here */
-		Renderer::Quad quad = {};
-		quad.Position = glm::vec3(320.0f, 240.0f, 0.0f);
-		quad.Image = testTexture;
-		m_Renderer->DrawQuad(quad);
+
+		if (GetState())
+			GetState()->Render();
+
+		m_Renderer->Draw();
+
+
 		/* Swap front and back buffers */
 		glfwSwapBuffers(m_Window);
 		/* Poll for and process events */
