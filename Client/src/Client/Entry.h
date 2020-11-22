@@ -1,8 +1,16 @@
+#pragma once
 #include "Game.h"
 #include "Network/Network.h"
 
+
+extern Game* CreateGameApplication();
+
 int main(void)
 {
+	auto game = CreateGameApplication();
+	game->Run();
+	delete game;
+
 	//Game* game = new Game(640, 480);
 	Network* network = Network::GetInstance();
 	network->isServer = false;
@@ -47,5 +55,4 @@ int main(void)
 	}
 	network->Release(network->m_Sock);
 	//delete game;
-
 }
