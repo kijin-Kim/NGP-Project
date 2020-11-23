@@ -177,7 +177,7 @@ DWORD LogicThread(LPVOID arg)
 DWORD SentThread(LPVOID arg)
 {
 	CLIENT_SOCKET sockStruct = *((CLIENT_SOCKET*)arg);
-	SOCKET client_sock = sockStruct s;
+	SOCKET client_sock = sockStruct.s;
 	int myNumber = sockStruct.clientNum;
 
 	while (1) 
