@@ -190,8 +190,8 @@ public:
 		}
 		else
 		{
-			char character = charQueue.front();
-			std::cout << character << std::endl;
+			wchar_t character = charQueue.front();
+			
 			// Send User Input
 			charQueue.pop();
 		}

@@ -24,7 +24,6 @@ Renderer::Renderer(int width, int height)
 		 0.0f, 0.0f
 	};
 
-
 	glGenBuffers(3, m_BufferIDs);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_BufferIDs[0]);
@@ -165,7 +164,7 @@ void Renderer::DrawQuad(const Quad& quad)
 	{
 		m_Shader->SetInt1("u_bToggleTexture", 0);
 	}
-
+	
 
 	if (quad.bUseColor)
 	{
