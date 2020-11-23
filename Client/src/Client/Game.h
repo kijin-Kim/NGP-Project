@@ -16,6 +16,7 @@ public:
 
 
 	std::queue<UserInput>& GetInputQueue() { return m_InputQueue; }
+
 protected:
 	State* GetState() const;
 	void SetState(State* state);

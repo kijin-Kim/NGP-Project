@@ -9,6 +9,9 @@
 #include<vector>
 #include<queue>
 
+#include<Network/Data.h>
+
+
 #define SERVERPORT 9000
 #define BUFSIZE    1024
 #define MAXCLIENT 4
@@ -29,6 +32,8 @@ int bufOffset = 0;//버퍼에 넣은 바이트 수
 SOCKET client_socket[5];
 queue<char*> sendQueues[5];//보내는 큐
 int sendQueueSizes[5];
+
+DWORD WINAPI LogicThread(LPVOID arg);
 
 
 struct EVENT
@@ -91,7 +96,6 @@ int recvn(SOCKET s, char* buf, int len, int flags)
 	return (len - left);
 }
 
-DWORD WINAPI LogicThread(LPVOID arg);
 
 void InitServer()
 {
@@ -141,7 +145,6 @@ void InitServer()
 		clientSock.s = client_sock;
 		clientSock.clientNum = curClientNumber;
 		
-
 		if (hThread == NULL) { closesocket(client_sock); }
 		else
 		{
@@ -167,8 +170,7 @@ void InitServer()
 
 DWORD LogicThread(LPVOID arg)
 {
-
-
+	
 	while (1)
 	{
 		//WaitForMultiple
@@ -187,8 +189,20 @@ DWORD LogicThread(LPVOID arg)
 
 
 		//버퍼를 채운다.
+		//플레이어
 		for (int i = 0; i < curClientNumber; ++i)
 		{
+			
+
+			UserInput userinput;
+			userinput.Action;
+			userinput.Key;
+
+			ServerToClientInGame servertoclientgame;
+			servertoclientgame.AnimationData;
+			servertoclientgame.ObjectPositions;
+			servertoclientgame.Scores;
+
 		}
 
 		//버퍼 채우기가 끝나면
