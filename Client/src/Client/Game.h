@@ -17,6 +17,7 @@ public:
 
 	std::queue<UserInput>& GetInputQueue() { return m_UserPointer.m_InputQueue; }
 	std::queue<wchar_t>& GetCharQueue() { return m_UserPointer.m_CharQueue; }
+
 protected:
 	State* GetState() const;
 	void SetState(State* state);

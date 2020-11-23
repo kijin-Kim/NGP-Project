@@ -29,7 +29,7 @@ struct float2
 	float Y = 0;
 };
 
-struct Animation : public IData       //클라이언트가 렌더링시 필요한 애니메이션 데이터
+struct Animation : public IData //클라이언트가 렌더링시 필요한 애니메이션 데이터
 {
 	uint8_t Status;  // 특정 오브젝트의 상태(예) 점프, 슬라이딩, Idle 등)
 	uint8_t SpriteIndex; //특정 상태에서 출력해야되는 2D 스프라이트의 인덱스
