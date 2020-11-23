@@ -24,6 +24,7 @@ Game::Game(int width, int height) :
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	glfwSwapInterval(1);
+	
 
 	/* Create a windowed mode window and its OpenGL context */
 
@@ -33,6 +34,7 @@ Game::Game(int width, int height) :
 
 	/* Make the window's context current */
 	glfwMakeContextCurrent(m_Window);
+	
 	
 
 
@@ -49,19 +51,12 @@ Game::Game(int width, int height) :
 
 
 	glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int c) 
-		{
-			
+		{			
 			wchar_t wc = (wchar_t)c;
-			wchar_t wc_buf[2] = { wc, 0 };
-			char buf[100];
-			memset((void*)buf, 0, 100);
-			size_t converted_len = wcstombs(buf, wc_buf, 100);
-			std::cout << buf << std::endl;
-			
-			/*UserPointer* userPointer = (UserPointer*)glfwGetWindowUserPointer(window);
-			userPointer->m_CharQueue.push(character);*/
+			UserPointer* userPointer = (UserPointer*)glfwGetWindowUserPointer(window);
+			userPointer->m_CharQueue.push(wc);
 		});
-	
+
 	
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
@@ -73,8 +68,6 @@ Game::Game(int width, int height) :
 	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
 	m_Renderer = new Renderer(m_Width, m_Height);
-
-	
 
 }
 

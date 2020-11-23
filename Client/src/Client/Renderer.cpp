@@ -1,10 +1,14 @@
 #include "Renderer.h"
 
+
+
 std::vector<Renderer::Quad> Renderer::m_Quads;
 
 Renderer::Renderer(int width, int height)
 {
 	m_Shader = new Shader("assets/shaders/VertexShader.glsl", "assets/shaders/FragmentShader.glsl");
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	float quadVertices[12] = {
 		-0.5f,  0.5f, 0.0f,
@@ -80,6 +84,7 @@ Renderer::Renderer(int width, int height)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
+	
 }
 
 Renderer::~Renderer()
@@ -119,7 +124,10 @@ void Renderer::DrawQuad(const Quad& quad)
 	m_Shader->SetMat4("u_Proj", m_ProjMat);
 
 	glm::mat4x4 modelMat = glm::mat4x4(1.0f);
-	modelMat = glm::translate(modelMat, glm::vec3(quad.Position, 0.0f));
+	if(!quad.bUseFont)
+		modelMat = glm::translate(modelMat, glm::vec3(quad.Position, 0.0f));
+	else
+		modelMat = glm::translate(modelMat, glm::vec3(quad.Position.x + quad.Font.Width / 2.0f, quad.Position.y + quad.Font.Row / 2.0f - (quad.Font.Row - quad.Font.Top), 0.0f));
 
 	Texture image = quad.Image;
 	if (quad.bUseTexture && image.Data)
@@ -155,8 +163,6 @@ void Renderer::DrawQuad(const Quad& quad)
 				glBufferData(GL_ARRAY_BUFFER, sizeof(quadTexCoord), quadTexCoord, GL_STATIC_DRAW);
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 			}
-			
-
 		}
 		m_Shader->SetInt1("u_Texture", 0);
 	}
@@ -164,18 +170,58 @@ void Renderer::DrawQuad(const Quad& quad)
 	{
 		m_Shader->SetInt1("u_bToggleTexture", 0);
 	}
+
+	if (quad.bUseFont)
+	{
+		m_Shader->SetInt1("u_bToggleFont", 1);
+
+		glActiveTexture(GL_TEXTURE0 + 0);
+		glBindTexture(GL_TEXTURE_2D, quad.Font.FontID);
+
+
+		glBindBuffer(GL_ARRAY_BUFFER, m_BufferIDs[2]);
+
+		float quadTexCoord[8] = {
+				0.0f, 1.0f,
+				1.0f, 1.0f,
+				1.0f, 0.0f,
+				0.0f, 0.0f
+		};
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadTexCoord), quadTexCoord, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		//modelMat = glm::scale(modelMat, glm::vec3(20.0f, 20.0f, 1.0f));
+		modelMat = glm::scale(modelMat, glm::vec3(quad.Font.Width, quad.Font.Row, 1.0f));
+		m_Shader->SetInt1("u_Texture", 0);
+	}
+	else
+		m_Shader->SetInt1("u_bToggleFont", 0);
+
 	
 
 	if (quad.bUseColor)
 	{
 		m_Shader->SetInt1("u_bToggleColor", 1);
 		m_Shader->SetVec4("u_Color", quad.Color);
+
+		glBindBuffer(GL_ARRAY_BUFFER, m_BufferIDs[2]);
+
+		float quadTexCoord[8] = {
+				0.0f, 0.0f,
+				1.0f, 0.0f,
+				1.0f, 1.0f,
+				0.0f, 1.0f,
+		};
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadTexCoord), quadTexCoord, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		
-		if(!quad.bUseTexture)
+		if(!quad.bUseTexture && !quad.bUseFont)
 			modelMat = glm::scale(modelMat, glm::vec3(quad.Size.x, quad.Size.y, 1.0f));
 	}
 	else
 		m_Shader->SetInt1("u_bToggleColor", 0);
+
+
 
 	m_Shader->SetMat4("u_Model", modelMat);
 

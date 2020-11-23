@@ -23,6 +23,8 @@ public:
 		m_TextureCache[texturePath] = new TextureData(texturePath);
 	}
 
+
+
 	void LoadTextureAtlas(const std::string& jsonFilePath, const std::string& filePath)
 	{
 		if (m_TextureAtlasCache.find(filePath) != m_TextureAtlasCache.end())
@@ -107,7 +109,13 @@ public:
 
 private:
 	TextureManager() = default;
-	~TextureManager() = default;
+	~TextureManager()
+	{
+		for (auto texture : m_TextureCache)
+			delete texture.second;
+		for (auto texture : m_TextureAtlasCache)
+			delete texture.second;
+	}
 
 private:
 	std::unordered_map<std::string, TextureData*> m_TextureCache;
