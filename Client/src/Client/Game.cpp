@@ -8,11 +8,13 @@
 #include "State.h"
 
 #include <iostream>
+#include <clocale>
 
 Game::Game(int width, int height) :
 	m_Width(width),
 	m_Height(height)
 {
+	std::locale::global(std::locale(""));
 	/* Initialize the library */
 	int result = glfwInit();
 	assert(result && "GLFW를 초기화 하는데 실패하였습니다.");
@@ -22,6 +24,7 @@ Game::Game(int width, int height) :
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	glfwSwapInterval(1);
+	
 
 	/* Create a windowed mode window and its OpenGL context */
 
@@ -31,16 +34,27 @@ Game::Game(int width, int height) :
 
 	/* Make the window's context current */
 	glfwMakeContextCurrent(m_Window);
+	
+	
 
 
-	glfwSetWindowUserPointer(m_Window, &m_InputQueue);
+	glfwSetWindowUserPointer(m_Window, &m_UserPointer);
 	glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 		{
-			std::queue<UserInput>* inputQueue = (std::queue<UserInput>*)glfwGetWindowUserPointer(window);
 			UserInput input = {};
 			input.Key = key;
 			input.Action = action;
-			inputQueue->push(input);
+
+			UserPointer* userPointer = (UserPointer*)glfwGetWindowUserPointer(window);
+			userPointer->m_InputQueue.push(input);
+		});
+
+
+	glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int c) 
+		{			
+			wchar_t wc = (wchar_t)c;
+			UserPointer* userPointer = (UserPointer*)glfwGetWindowUserPointer(window);
+			userPointer->m_CharQueue.push(wc);
 		});
 
 	
@@ -60,7 +74,7 @@ Game::Game(int width, int height) :
 Game::~Game()
 {
 	delete m_Renderer;
-	delete GetState();
+	delete m_State;
 	glfwTerminate();
 }
 

@@ -2,6 +2,8 @@
 #include "Client/Entry.h"
 #include "Client/State.h"
 #include "Client/Renderer.h"
+#include "Client/FontData.h"
+
 
 class GameState : public State
 {
@@ -115,7 +117,7 @@ public:
 	virtual void SendData() override
 	{
 		UserInput input = {};
-		auto inputQueue = m_Game->GetInputQueue();
+		auto& inputQueue = m_Game->GetInputQueue();
 		input.Key = -1;
 		if (inputQueue.empty())
 		{
@@ -174,15 +176,30 @@ public:
 		m_ChatBoard.bUseColor = true;
 		m_ChatBoard.bUseTexture = false;
 		m_ChatBoard.Position = glm::vec2(432/ 2.0f, 304 / 2.0f);
-		m_ChatBoard.Color = glm::vec4(0.3f, 0.3f, 0.3f, 0.8f);
+		m_ChatBoard.Color = glm::vec4(0.2f, 0.2f, 0.2f, 0.8f);
 		m_ChatBoard.Size = glm::vec2(432 - 20,  304 - 20);
-		
-		
+
+		m_FontData = new FontData("assets/fonts/vt323/VT323-Regular.ttf", 20);
 	}
-	virtual ~LobbyState() = default;
+	virtual ~LobbyState()
+	{
+		delete m_FontData;
+	}
 
 	virtual void SendData() override
-	{	
+	{
+		auto& charQueue = m_Game->GetCharQueue();
+		if (charQueue.empty())
+		{
+			// Send Empty Input
+		}
+		else
+		{
+			wchar_t character = charQueue.front();
+			// Send User Input
+			charQueue.pop();
+		}
+
 	}
 	virtual void ReceiveData() override
 	{
@@ -193,13 +210,42 @@ public:
 	{
 		Renderer::RegisterQuads(m_BackGroundTiles, _countof(m_BackGroundTiles));
 		Renderer::RegisterQuads(&m_ChatBoard, 1);
+
+		
+		std::vector<Renderer::Quad> ftQuads;
+		ftQuads.resize(m_String.size());
+
+		int advance = 0;
+		int lineCount = 0;
+		for (int i = 0; i < m_String.size(); i++)
+		{
+			Font ft = m_FontData->GetFont(m_String[i]);
+			ftQuads[i].bUseTexture = false;
+			ftQuads[i].bUseFont = true;
+			ftQuads[i].Position = glm::vec2(20.0f + advance,  304.0f - 30.0f - lineCount * 15.0f);
+			ftQuads[i].Font = ft;
+			ftQuads[i].bUseColor = true;
+			ftQuads[i].Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+			advance += ftQuads[i].Font.Advance;
+
+			if (20.0f + advance >= 432.0f - 20.0f)
+			{
+				lineCount++;
+				advance = 0.0f;
+			}
+		}
+
+		
+		Renderer::RegisterQuads(ftQuads);
+
 	}
 
 private:
 	Renderer::Quad m_BackGroundTiles[20];
 	Renderer::Quad m_ChatBoard;
-
+	FontData* m_FontData;
 	ServerToClientInLobby m_Data = {};
+	std::string m_String = "PBR, or more commonly known as physically based rendering, is a collection of render techniques that are more or less based on the same underlying theory that more closely matches that of the physical world. As physically based rendering aims to mimic light in a physically plausible way, it generally looks more realistic compared to our original lighting algorithms like Phong and Blinn-Phong. Not only does it look better, as it closely approximates actual physics, we (and especially the artists) can author surface materials based on physical parameters without having to resort to cheap hacks and tweaks to make the lighting look right. One of the bigger advantages of authoring materials based on physical parameters is that these materials will look correct regardless of lighting conditions; something that is not true in non-PBR pipelines.";
 };
 
 class LoginState : public State
@@ -251,8 +297,8 @@ public:
 		TextureManager* textureManager = TextureManager::GetInstance();
 		textureManager->LoadTextureAtlas("assets/textures/sprite_sheet.json", "assets/textures/sprite_sheet.png");
 
-		SetState(new GameState(this));
-		//SetState(new LobbyState(this));
+		//SetState(new GameState(this));
+		SetState(new LobbyState(this));
 		//SetState(new LoginState(this));
 	}
 	virtual ~PickachuVolleyBall() = default;
