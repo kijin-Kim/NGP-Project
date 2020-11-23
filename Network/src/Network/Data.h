@@ -67,7 +67,7 @@ struct ServerToClientInLobby : public IData //Client가 로비를 렌더링할 때 필요한
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-struct ClinetToServerInLogin : public IData //클라이언트가 서버에게 보낼 닉네임
+struct ClientToServerInLogin : public IData //클라이언트가 서버에게 보낼 닉네임
 {
 	wchar_t NickName[8];
 };
