@@ -33,15 +33,23 @@ Game::Game(int width, int height) :
 	glfwMakeContextCurrent(m_Window);
 
 
-	glfwSetWindowUserPointer(m_Window, &m_InputQueue);
+	glfwSetWindowUserPointer(m_Window, &m_UserPointer);
 	glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 		{
-			std::queue<UserInput>* inputQueue = (std::queue<UserInput>*)glfwGetWindowUserPointer(window);
 			UserInput input = {};
 			input.Key = key;
 			input.Action = action;
-			inputQueue->push(input);
+
+			UserPointer* userPointer = (UserPointer*)glfwGetWindowUserPointer(window);
+			userPointer->m_InputQueue.push(input);
 		});
+
+	glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int character) 
+		{
+			UserPointer* userPointer = (UserPointer*)glfwGetWindowUserPointer(window);
+			userPointer->m_CharQueue.push(character);
+		});
+
 
 	
 	GLenum err = glewInit();
@@ -60,7 +68,7 @@ Game::Game(int width, int height) :
 Game::~Game()
 {
 	delete m_Renderer;
-	delete GetState();
+	delete m_State;
 	glfwTerminate();
 }
 

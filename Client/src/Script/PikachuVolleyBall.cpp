@@ -115,7 +115,7 @@ public:
 	virtual void SendData() override
 	{
 		UserInput input = {};
-		auto inputQueue = m_Game->GetInputQueue();
+		auto& inputQueue = m_Game->GetInputQueue();
 		input.Key = -1;
 		if (inputQueue.empty())
 		{
@@ -182,7 +182,20 @@ public:
 	virtual ~LobbyState() = default;
 
 	virtual void SendData() override
-	{	
+	{
+		auto& charQueue = m_Game->GetCharQueue();
+		if (charQueue.empty())
+		{
+			// Send Empty Input
+		}
+		else
+		{
+			char character = charQueue.front();
+			std::cout << character << std::endl;
+			// Send User Input
+			charQueue.pop();
+		}
+
 	}
 	virtual void ReceiveData() override
 	{
@@ -251,8 +264,8 @@ public:
 		TextureManager* textureManager = TextureManager::GetInstance();
 		textureManager->LoadTextureAtlas("assets/textures/sprite_sheet.json", "assets/textures/sprite_sheet.png");
 
-		SetState(new GameState(this));
-		//SetState(new LobbyState(this));
+		//SetState(new GameState(this));
+		SetState(new LobbyState(this));
 		//SetState(new LoginState(this));
 	}
 	virtual ~PickachuVolleyBall() = default;
