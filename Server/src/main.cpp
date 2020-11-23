@@ -12,6 +12,7 @@
 #include<Network/Data.h>
 
 
+
 #define SERVERPORT 9000
 #define BUFSIZE    1024
 #define MAXCLIENT 4
@@ -167,6 +168,42 @@ void InitServer()
 	}
 }
 
+//기능별로 나누고 싶어서 RecvThread 생성. 
+DWORD __stdcall RecvThread(LPVOID arg)
+{
+	CLIENT_SOCKET sockStruct = *((CLIENT_SOCKET*)arg);
+	SOCKET client_sock = sockStruct.s;
+	int myNumber = sockStruct.clientNum;
+
+	SOCKADDR_IN address;
+	int addrlen = sizeof(address);
+
+	getpeername(client_sock, (SOCKADDR*)&address, &addrlen);
+
+	EVENT event;
+
+	cout << "내 클라이언트 번호 : " << myNumber << endl;
+
+
+	//// 클라이언트와 전송
+	while (1)
+	{
+		recvn(client_sock, (char*)(&event), sizeof(EVENT), 0);
+
+		eventQueues[myNumber].push(event);
+		queueSizes[myNumber]++;
+
+		// SetEvent하기
+		SetEvent(recvEvents[myNumber]);
+	}
+
+	printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
+		inet_ntoa(address.sin_addr), ntohs(address.sin_port));
+	cout << "------------------------------------------------------------------" << endl;
+
+	return 0;
+}
+
 
 DWORD LogicThread(LPVOID arg)
 {
@@ -183,7 +220,11 @@ DWORD LogicThread(LPVOID arg)
 				EVENT curEvent = eventQueues[i].front();//이벤트를 먼저 받아놓고 다음 줄에서 pop
 				eventQueues[i].pop();
 
+				//플레이어에 대한 정보를 받아와야함.
+				//플레이어 위치,상태(점프,,)
+
 				queueSizes[i]--;
+				//플레이어마다 Update 진행
 			}
 		}
 
@@ -192,16 +233,14 @@ DWORD LogicThread(LPVOID arg)
 		//플레이어
 		for (int i = 0; i < curClientNumber; ++i)
 		{
-			
-
 			UserInput userinput;
 			userinput.Action;
 			userinput.Key;
+		}
 
-			ServerToClientInGame servertoclientgame;
-			servertoclientgame.AnimationData;
-			servertoclientgame.ObjectPositions;
-			servertoclientgame.Scores;
+		//스코어
+		for (int i = 0; i < curClientNumber; ++i)
+		{
 
 		}
 
@@ -222,7 +261,7 @@ DWORD LogicThread(LPVOID arg)
 		{
 			SetEvent(sendEvents[i]);
 		}
-		ZeroMemory(buffer, 1000000);
+		ZeroMemory(buffer, 100000);
 		bufOffset = 0;
 
 	}
