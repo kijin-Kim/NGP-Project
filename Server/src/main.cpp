@@ -18,9 +18,9 @@ int main()
 	HANDLE hThread;
 
 	while (1) {
+		
 		hThread = CreateThread(NULL, 0, ListeningThread,
 			(LPVOID)network->m_ClientSock, 0, NULL);
-
 		if (hThread == NULL) {
 			closesocket(network->m_ClientSock);
 		}
@@ -36,20 +36,25 @@ DWORD ListeningThread(LPVOID)
 {
 	Network* network = Network::GetInstance();
 	char buf[BUFSIZE + 1];
-	int myClientID = 0;
 	int id = 0;
 
 	while (1)
 	{
 		network->Accept();
-		printf("LT_[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d\n",
+		++ClientCount;
+		printf("LT_[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d,클라이언트 넘버=%d\n",
 			inet_ntoa(network->m_ClientAddr.sin_addr),
-			ntohs(network->m_ClientAddr.sin_port));
+			ntohs(network->m_ClientAddr.sin_port),
+			ClientCount);
 		network->ClientInfo();
 
-
-		m_hClientsThreads[id] = CreateThread(NULL, 0, ProcessRecvThread,
+		// ID 전송
+		int retval = send(network->m_ClientSock, (char*)&id, sizeof(int), 0);
+		if (SOCKET_ERROR == retval)network->ErrQuit(L"send ID error");
+		
+		m_hClientsThreads[id]= CreateThread(NULL, 0, ProcessRecvThread,
 			(LPVOID)network->m_ClientSock,0,NULL);
+	
 		if (NULL == m_hClientsThreads[id]) 
 		{
 			closesocket(network->m_ClientSock);
