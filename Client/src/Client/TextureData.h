@@ -44,6 +44,12 @@ public:
 		glBindTexture(GL_TEXTURE_2D, m_ID);
 	}
 
+	void UnBind() const
+	{
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+
 
 	int GetWidth() const { return m_Width; }
 	int GetHeight() const { return m_Height; }

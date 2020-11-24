@@ -100,18 +100,19 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WINSOCK_DEPRECATED_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)External\GLFW\$(PlatformName)\include;$(SolutionDir)External\GLEW\include;$(SolutionDir)External\GLM\glm;$(SolutionDir)Network\src;$(SolutionDir)External\stb_image;;$(ProjectDir)\src;$(SolutionDir)External\jsonCpp</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)External\GLFW\$(PlatformName)\include;$(SolutionDir)External\GLEW\include;$(SolutionDir)External\GLM\glm;$(SolutionDir)Network\src;$(SolutionDir)External\stb_image;$(SolutionDir)External\FreeType\include;$(SolutionDir)External\JsonCpp;$(SolutionDir)Client\src</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019;$(SolutionDir)External\GLEW\lib\release\$(PlatformName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3dll.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019;$(SolutionDir)External\GLEW\lib\release\$(PlatformName);$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
       <Command>copy "$(SolutionDir)External\GLEW\bin\Release\$(PlatformName)\glew32.dll" "$(OutDir)"
-copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDir)"</Command>
+copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDir)"
+copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\freetype.dll" "$(OutDir)"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -122,7 +123,7 @@ copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDi
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WINSOCK_DEPRECATED_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)External\GLFW\$(PlatformName)\include;$(SolutionDir)External\GLEW\include;$(SolutionDir)External\GLM\glm;$(SolutionDir)Network\src;$(SolutionDir)External\stb_image;;$(ProjectDir)\src;$(SolutionDir)External\jsonCpp</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)External\GLFW\$(PlatformName)\include;$(SolutionDir)External\GLEW\include;$(SolutionDir)External\GLM\glm;$(SolutionDir)Network\src;$(SolutionDir)External\stb_image;$(SolutionDir)External\FreeType\include;$(SolutionDir)External\JsonCpp;$(SolutionDir)Client\src</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -130,12 +131,13 @@ copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDi
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019;$(SolutionDir)External\GLEW\lib\release\$(PlatformName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3dll.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019;$(SolutionDir)External\GLEW\lib\release\$(PlatformName);$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
       <Command>copy "$(SolutionDir)External\GLEW\bin\Release\$(PlatformName)\glew32.dll" "$(OutDir)"
-copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDir)"</Command>
+copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDir)"
+copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\freetype.dll" "$(OutDir)"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -144,18 +146,19 @@ copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDi
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WINSOCK_DEPRECATED_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)External\GLFW\$(PlatformName)\include;$(SolutionDir)External\GLEW\include;$(SolutionDir)External\GLM\glm;$(SolutionDir)Network\src;$(SolutionDir)External\stb_image;$(SolutionDir)External\JsonCpp;$(ProjectDir)\src;$(SolutionDir)External\jsonCpp</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)External\GLFW\$(PlatformName)\include;$(SolutionDir)External\GLEW\include;$(SolutionDir)External\GLM\glm;$(SolutionDir)Network\src;$(SolutionDir)External\stb_image;$(SolutionDir)External\FreeType\include;$(SolutionDir)External\JsonCpp;$(SolutionDir)Client\src</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019;$(SolutionDir)External\GLEW\lib\release\$(PlatformName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3dll.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019;$(SolutionDir)External\GLEW\lib\release\$(PlatformName);$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
       <Command>copy "$(SolutionDir)External\GLEW\bin\Release\$(PlatformName)\glew32.dll" "$(OutDir)"
-copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDir)"</Command>
+copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDir)"
+copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\freetype.dll" "$(OutDir)"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -166,7 +169,7 @@ copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDi
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WINSOCK_DEPRECATED_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)External\GLFW\$(PlatformName)\include;$(SolutionDir)External\GLEW\include;$(SolutionDir)External\GLM\glm;$(SolutionDir)Network\src;$(SolutionDir)External\stb_image;;$(ProjectDir)\src;$(SolutionDir)External\jsonCpp</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)External\GLFW\$(PlatformName)\include;$(SolutionDir)External\GLEW\include;$(SolutionDir)External\GLM\glm;$(SolutionDir)Network\src;$(SolutionDir)External\stb_image;$(SolutionDir)External\FreeType\include;$(SolutionDir)External\JsonCpp;$(SolutionDir)Client\src</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -174,12 +177,13 @@ copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDi
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019;$(SolutionDir)External\GLEW\lib\release\$(PlatformName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3dll.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019;$(SolutionDir)External\GLEW\lib\release\$(PlatformName);$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
       <Command>copy "$(SolutionDir)External\GLEW\bin\Release\$(PlatformName)\glew32.dll" "$(OutDir)"
-copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDir)"</Command>
+copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDir)"
+copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\freetype.dll" "$(OutDir)"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -194,6 +198,7 @@ copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDi
     <ClInclude Include="..\External\JsonCpp\json\json-forwards.h" />
     <ClInclude Include="..\External\JsonCpp\json\json.h" />
     <ClInclude Include="..\External\stb_image\stb\stb_image.h" />
+    <ClInclude Include="src\Client\FontData.h" />
     <ClInclude Include="src\Client\Game.h" />
     <ClCompile Include="src\Script\PikachuVolleyBall.cpp" />
     <ClInclude Include="src\Client\Renderer.h" />

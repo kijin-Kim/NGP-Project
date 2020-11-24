@@ -49,7 +49,7 @@ struct ServerToClientInGame : public IData //Client가 게임을 렌더링할 때 필요한 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-struct ClinetToServerInLobby : public IData  //서버가 로비에서 Client에게 넘겨줄(Client가 렌더링할때 필요한) 데이터를 계산하기 위해 필요한 데이터
+struct ClientToServerInLobby : public IData  //서버가 로비에서 Client에게 넘겨줄(Client가 렌더링할때 필요한) 데이터를 계산하기 위해 필요한 데이터
 {
 	wchar_t Chat[256];
 };

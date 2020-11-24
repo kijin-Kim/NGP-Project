@@ -1,6 +1,7 @@
 #pragma once
 #include "Shader.h"
 #include "TextureManager.h"
+#include "FontData.h"
 #include <glm/glm.hpp>
 
 
@@ -18,8 +19,10 @@ public:
 		bool bUseColor = false;
 		glm::vec4 Color = glm::vec4(1.0f, 1.0f, 1.0, 1.0f);
 		glm::vec2 Size = glm::vec2(1.0f, 1.0f);
-
 		bool bShouldFlipVertical = false;
+
+		bool bUseFont = false;
+		Font Font = {};
 	};
 
 	Renderer(int width, int height);
@@ -32,6 +35,7 @@ public:
 	void Reset();
 	void Draw();
 	void DrawQuad(const Quad& quad);
+	
 
 private:
 	glm::mat4x4 m_ProjMat = glm::mat4x4(1.0f);

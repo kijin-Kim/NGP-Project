@@ -15,7 +15,8 @@ public:
 	void Run();
 
 
-	std::queue<UserInput>& GetInputQueue() { return m_InputQueue; }
+	std::queue<UserInput>& GetInputQueue() { return m_UserPointer.m_InputQueue; }
+	std::queue<wchar_t>& GetCharQueue() { return m_UserPointer.m_CharQueue; }
 
 protected:
 	State* GetState() const;
@@ -29,7 +30,13 @@ private:
 	int m_Width;
 	int m_Height;
 
-	std::queue<UserInput> m_InputQueue;
+	struct UserPointer
+	{
+		std::queue<UserInput> m_InputQueue;
+		std::queue<wchar_t> m_CharQueue;
+	};
+
+	UserPointer m_UserPointer;
 
 	State* m_State;
 };
