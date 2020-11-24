@@ -36,7 +36,7 @@ void Network::ErrQuit(const wchar_t* msg)
 		NULL, WSAGetLastError(),
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 		(LPTSTR)&lpMsgBuf, 0, NULL);
-	MessageBox(NULL, (LPCWSTR)lpMsgBuf, msg, MB_ICONERROR);
+	//MessageBox(NULL, (LPCWSTR)lpMsgBuf, msg, MB_ICONERROR);
 	LocalFree(lpMsgBuf);
 	exit(1);
 }

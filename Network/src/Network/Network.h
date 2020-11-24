@@ -6,6 +6,10 @@
 
 #define SERVERIP   "127.0.0.1"
 #define SERVERPORT 9000
+<<<<<<< Updated upstream
+=======
+#define BUFSIZE    512
+>>>>>>> Stashed changes
 
 class Network
 {
