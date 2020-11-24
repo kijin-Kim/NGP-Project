@@ -29,7 +29,7 @@ Network* Network::GetInstance()
 	return &Instance;
 }
 
-inline void Network::ErrQuit(const wchar_t* msg)
+void Network::ErrQuit(const wchar_t* msg)
 {
 	LPVOID lpMsgBuf;
 	FormatMessage(
@@ -42,7 +42,7 @@ inline void Network::ErrQuit(const wchar_t* msg)
 	exit(1);
 }
 
-inline void Network::ErrDisplay(const wchar_t* msg)
+void Network::ErrDisplay(const wchar_t* msg)
 {
 	LPVOID lpMsgBuf;
 	FormatMessage(
