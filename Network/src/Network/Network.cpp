@@ -1,20 +1,21 @@
 #include "Network.h"
 
-
-
 Network::Network()
 {
 	WSADATA wsa;
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
 		ErrQuit(L"WSAStartup() Error");
 
-	SOCKET m_Sock = socket(AF_INET, SOCK_STREAM, 0);
+	m_Sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (m_Sock == INVALID_SOCKET)
 		ErrQuit(L"socket()");
 
 	ZeroMemory(&m_ServerAddr, sizeof(m_ServerAddr));
 	m_ServerAddr.sin_family = AF_INET;
-	m_ServerAddr.sin_addr.s_addr = inet_addr(SERVERIP);
+	if (isServer == false)
+		m_ServerAddr.sin_addr.s_addr = inet_addr(SERVERIP);
+	if (isServer == true)
+		m_ServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	m_ServerAddr.sin_port = htons(SERVERPORT);
 }
 
@@ -57,7 +58,7 @@ int Network::Recvn(SOCKET s, char* buf, int len, int flags)
 {
 	int received;
 	char* ptr = buf;
-	int left = len;	
+	int left = len;
 
 	while (left > 0) {
 		received = recv(s, ptr, left, flags);
@@ -72,15 +73,54 @@ int Network::Recvn(SOCKET s, char* buf, int len, int flags)
 	return (len - left);
 }
 
-
 void Network::Connect()
 {
-	int retval = connect(m_Sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
-	if (retval == SOCKET_ERROR)	ErrQuit(L"connect()");
+	retval = connect(m_Sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
+	if (retval == SOCKET_ERROR)	ErrQuit(L"connect error()");
 }
 
-void Network::Release()
+void Network::ClientInfo()
 {
-	closesocket(m_Sock);
+	addrlen = sizeof(m_ClientAddr);
+	getpeername(m_ClientSock, (SOCKADDR*)&m_ClientAddr, &addrlen);
+}
+
+void Network::BindAndListen()
+{
+	retval = bind(m_Sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
+	if (retval == SOCKET_ERROR) ErrQuit(L"bind error()");
+
+	retval = listen(m_Sock, SOMAXCONN);
+	if (retval == SOCKET_ERROR) ErrQuit(L"listen error()");
+}
+
+void Network::Accept()
+{
+	addrlen = sizeof(m_ClientAddr);
+	m_ClientSock = accept(m_Sock, (SOCKADDR*)&m_ClientAddr, &addrlen);
+	if (m_ClientSock == INVALID_SOCKET) ErrDisplay(L"accept error()");
+}
+
+void Network::Send(char* buf, int dataSize)
+{
+	if (isServer == true)
+		retval = send(m_ClientSock, buf, dataSize, 0);
+
+	if (isServer == false)
+		retval = send(m_Sock, buf, dataSize, 0);
+}
+
+void Network::Recv(char* buf, int dataSize)
+{
+	if (isServer == true)
+		retval = Recvn(m_ClientSock, buf, dataSize, 0);
+
+	if (isServer == false)
+		retval = Recvn(m_Sock, buf, dataSize, 0);
+}
+
+void Network::Release(SOCKET sock)
+{
+	closesocket(sock);
 	WSACleanup();
 }

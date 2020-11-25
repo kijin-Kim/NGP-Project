@@ -10,10 +10,16 @@ struct IData  //데이터들을 하나의 컨테이너에 넣기 위한 인터페이스 클래스
 ///////////////////////////////////////////////////INGAME//////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+struct UserInput
+{
+	uint16_t Key; //클라이언트의 입력 값
+	uint8_t Action; //클라이언트의 입력 값 상태 PRESSED, RELEASED, REPEATED
+};
+
 struct ClientToServerInGame : public IData //서버가 게임에서 Client에게 넘겨줄(Client가 렌더링할때 필요한) 데이터를 계산하기 위해 필요한 데이터
 {
 	uint8_t ID;        //클라이언트를 구분하기 위한 id
-	uint16_t InputKey; //클라이언트의 입력 값
+	UserInput Input;
 };
 
 
@@ -23,7 +29,7 @@ struct float2
 	float Y = 0;
 };
 
-struct Animation : public IData       //클라이언트가 렌더링시 필요한 애니메이션 데이터
+struct Animation : public IData //클라이언트가 렌더링시 필요한 애니메이션 데이터
 {
 	uint8_t Status;  // 특정 오브젝트의 상태(예) 점프, 슬라이딩, Idle 등)
 	uint8_t SpriteIndex; //특정 상태에서 출력해야되는 2D 스프라이트의 인덱스
@@ -43,7 +49,7 @@ struct ServerToClientInGame : public IData //Client가 게임을 렌더링할 때 필요한 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-struct ClinetToServerInLobby : public IData  //서버가 로비에서 Client에게 넘겨줄(Client가 렌더링할때 필요한) 데이터를 계산하기 위해 필요한 데이터
+struct ClientToServerInLobby : public IData  //서버가 로비에서 Client에게 넘겨줄(Client가 렌더링할때 필요한) 데이터를 계산하기 위해 필요한 데이터
 {
 	wchar_t Chat[256];
 };
