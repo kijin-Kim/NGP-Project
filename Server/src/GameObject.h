@@ -10,7 +10,7 @@ public:
 	GameObject() = default;
 	virtual ~GameObject() = default;
 
-	void SetPosition(glm::vec2 position) { m_Position = position; }
+	void SetPosition(const glm::vec2& position) { m_Position = position; }
 	const glm::vec2& GetPosition() const { return m_Position; }
 
 	void SetTag(const std::string& tag) { m_Tag = tag; }
@@ -55,8 +55,10 @@ public:
 		{
 		case GLFW_KEY_LEFT:
 			if (input.Action == GLFW_PRESS)
-				if (GetState() == Pickachu::Idle)
-					break;
+			{
+				glm::vec2 currentPosition = GetPosition();
+				SetPosition({ currentPosition.x + 1.0f, currentPosition.y });
+			}
 				break;
 			if (input.Action == GLFW_REPEAT)
 				break;

@@ -119,20 +119,23 @@ public:
 		UserInput input = {};
 		auto& inputQueue = m_Game->GetInputQueue();
 		input.Key = -1;
-		if (inputQueue.empty())
-		{
-			// Send Empty Input
-		}
-		else
+		if (!inputQueue.empty())
 		{
 			input = inputQueue.front();
-			// Send User Input
 			inputQueue.pop();
 		}
+
+
+		ClientToServerInGame data = {};
+		data.ID = 0;
+		data.Input = input;
+		
+		Network::GetInstance()->Send((char*)&data, 108);
 	}
 	virtual void ReceiveData() override
 	{
-
+		ServerToClientInGame data = {};
+		Network::GetInstance()->Recv((char*)&data, 108);
 	}
 
 	virtual void Render() override

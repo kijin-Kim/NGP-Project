@@ -1,63 +1,118 @@
+#include <queue>
 #include "Network/Network.h"
 #include "Network/Data.h"
+#include "State.h"
 #define MAX_USER 4
 
 DWORD ListeningThreadProc(LPVOID);
 DWORD CommunicationThreadProc(LPVOID arg);
 
-int ClientCount = 0;
-HANDLE m_hClientsThreads[MAX_USER];// clients threads
+
+
+std::queue<IData*> g_DataQueue;
+IData* g_ProcessedData[MAX_USER];
+ClientState g_ClientStates[MAX_USER] = { ClientState::Game, ClientState::Game, ClientState::Game, ClientState::Game, }; //TEMP
+HANDLE g_ClientEvents[MAX_USER];
+
+
+struct ClientInformation
+{
+	unsigned int ID = 0;
+	SOCKET Socket = NULL;
+};
 
 
 int main()
-{
+{	
+	LobbyState* lobbyState = new LobbyState();
+	GameState* gameState = new GameState();
+	LoginState* loginState = new LoginState();
+
+
+	
 	char buf[BUFSIZE + 1];
 	Network* network = Network::GetInstance();
 	network->isServer = true;
 	network->BindAndListen();
 	HANDLE hThread;
 
-	while (1) {
-		
-		hThread = CreateThread(NULL, 0, ListeningThreadProc,
-			(LPVOID)network->m_ClientSock, 0, NULL);
-		if (hThread == NULL) {
-			closesocket(network->m_ClientSock);
-		}
-		else {
-			CloseHandle(hThread);
+	float fTimeElapsed = 0.16f;
+
+	hThread = CreateThread(NULL, 0, ListeningThreadProc,
+		(LPVOID)network->m_ClientSock, 0, NULL);
+	if (hThread == NULL) {
+		closesocket(network->m_ClientSock);
+	}
+	else {
+		CloseHandle(hThread);
+	}
+
+
+	while (true)
+	{
+		if (g_DataQueue.empty())
+		{
+			for (auto s : g_ClientStates)
+			{
+				switch (s)
+				{
+				case ClientState::Game:
+					gameState->UpdateData(fTimeElapsed, nullptr);
+					break;
+				}
+			}
+			continue;
 		}
 
+
+		//클라가 보낸 데이터를 꺼낸다.
+		IData* data = g_DataQueue.front();	
+		g_DataQueue.pop();
+
+		//로직을 계산한다.
+		
+		switch (g_ClientStates[data->ID])
+		{
+		case ClientState::Game:
+			g_ProcessedData[data->ID] = gameState->UpdateData(fTimeElapsed, data);
+			break;
+		default:
+			break;
+		}
+
+		//새로운 데이터를 넣는다.
+		SetEvent(g_ClientEvents[data->ID]);
 	}
-	return 1;
+
 }
 
 DWORD ListeningThreadProc(LPVOID)
 {
+	static int ClientCount = 0;
+
 	Network* network = Network::GetInstance();
 	char buf[BUFSIZE + 1];
 	int id = 0;
 
+
 	while (1)
 	{
 		network->Accept();
-		++ClientCount;
+		
 		printf("LT_[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d,클라이언트 넘버=%d\n",
 			inet_ntoa(network->m_ClientAddr.sin_addr),
 			ntohs(network->m_ClientAddr.sin_port),
 			ClientCount);
-		network->ClientInfo();
 
-		// ID 전송
-		//network->Send((char*)&id, sizeof(int));
+		ClientInformation information = { ClientCount++, network->m_ClientSock };
 
-		m_hClientsThreads[id]= CreateThread(NULL, 0, CommunicationThreadProc,
-			(LPVOID)network->m_ClientSock,0,NULL);
-	
-		if (NULL == m_hClientsThreads[id]) 
+		// CLIENT 마다 쓰레드를 만들어줌
+		HANDLE hThread = CreateThread(NULL, 0, CommunicationThreadProc, (LPVOID)&information, 0, NULL);
+		if (!hThread)
 		{
-			closesocket(network->m_ClientSock);
+			// SOMETHING
 		}
+
 	}
 
 	network->Release(network->m_Sock);
@@ -66,39 +121,56 @@ DWORD ListeningThreadProc(LPVOID)
 DWORD CommunicationThreadProc(LPVOID arg)
 {
 	Network* network = Network::GetInstance();
-	char buf[BUFSIZE + 1];
-	ServerToClientInGame p1;
 
-	int id = reinterpret_cast<int>(arg);
-	printf("TCP 접속, ID : %d\n", id);
 
-	//클라이언트 접속 정보
-	network->ClientInfo();
-	while (1)
-	{
-		network->Recv(buf, BUFSIZE);
-		if (network->retval == SOCKET_ERROR) {
-			network->ErrDisplay(L"recv()");
-			break;
-		}
-		else if (network->retval == 0)
-			break;
-		p1 = *(ServerToClientInGame*)buf;
-		printf("%d\n", p1.AnimationData[0].SpriteIndex);
-		printf("%d\n", p1.Scores[0]);
+	ClientInformation clientInformation = *(ClientInformation*)arg;
 	
+	g_ClientEvents[clientInformation.ID] = CreateEvent(NULL, FALSE, FALSE, NULL);
 
-		buf[network->retval] = '\0';
-		printf("[TCP/%s:%d] %s\n", inet_ntoa(network->m_ClientAddr.sin_addr),
-		ntohs(network->m_ClientAddr.sin_port), buf);
-		
-		printf("[TCP 클라이언트] %d바이트를 받았습니다.\n", network->retval);
-		
-		network->Send(buf, BUFSIZE);
-		if (network->retval == SOCKET_ERROR) {
-			network->ErrDisplay(L"send()");
+	while (1) {
+
+		int recvBufferSize = 0;
+		IData* recvBuffer = nullptr;
+		switch (g_ClientStates[clientInformation.ID])
+		{
+		case ClientState::Game:
+			recvBufferSize = sizeof(ClientToServerInGame);
+			recvBuffer = new ClientToServerInGame();
+			break;
+		default:
 			break;
 		}
+		// 클라이언트로부터 데이터를 받음.
+
+		if (recvBuffer)
+		{
+			network->Recv((char*)recvBuffer, recvBufferSize);
+			if (network->retval == SOCKET_ERROR) {
+				network->ErrDisplay(L"recv()");
+				break;
+			}
+			else if (network->retval == 0)
+				break;
+
+			// 데이터를 Queue에 넣음.
+			g_DataQueue.push(recvBuffer);
+
+
+			// 로직이 계산될 때까지 기다림.
+			if (g_ClientEvents[recvBuffer->ID])
+				WaitForSingleObject(g_ClientEvents[recvBuffer->ID], INFINITE);
+
+			// 계산된 데이터를 보냄
+			if (g_ProcessedData[recvBuffer->ID])
+			{
+				network->Send((char*)g_ProcessedData[recvBuffer->ID], 108);
+				delete g_ProcessedData[recvBuffer->ID];
+				g_ProcessedData[recvBuffer->ID] = nullptr;
+			}
+		}
+		
 	}
+
+
 	return 0;
 }
