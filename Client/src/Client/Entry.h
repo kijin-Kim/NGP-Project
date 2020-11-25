@@ -1,20 +1,12 @@
 #pragma once
 #include "Game.h"
 #include "Network/Network.h"
+#include "Network/Data.h"
 
 extern Game* CreateGameApplication();
 
 int main(void)
 {
-	auto game = CreateGameApplication();
-	game->Run();
-	delete game;
-
-	Network* network = Network::GetInstance();
-	network->isServer = false;
-	network->Connect();
-	char buf[BUFSIZE + 1];
-
 	const char* testdata[] = {
 	   "HELLO",
 	   "NICE TO MEET YOU",
@@ -22,15 +14,36 @@ int main(void)
 	   "So do I.",
 	};
 
+	auto game = CreateGameApplication();
+	game->Run();
+	delete game;
+
+	ServerToClientInGame p1;
+	for (int i = 0; i < 5; i++)
+	{
+		p1.ObjectPositions[i] = { (float)i,(float)i };
+		p1.AnimationData[i].SpriteIndex = i + 1;
+		p1.AnimationData[i].Status = i + 1;
+	}
+	p1.Scores[0] = 100;
+	p1.Scores[1] = 200;
+	
+	Network* network = Network::GetInstance();
+	network->isServer = false;
+	network->Connect();
+	char buf[BUFSIZE + 1];
+
+	
 	for (int i = 0; i < 4; i++)
 	{
 	/*	printf("ют╥б: ");
 		scanf("%s", &testdata);*/
 
 		memset(buf, ' ', sizeof(buf));
-		strncpy(buf, testdata[i], strlen(testdata[i]));
+		//strncpy(buf, (char*)&p1, strlen((char*)&p1));
+		//memcpy(buf, &p1, sizeof(struct UserInput));
 
-		network->Send(buf, BUFSIZE);
+		network->Send((char*)&p1, BUFSIZE);
 		if (network->retval == SOCKET_ERROR) {
 			network->ErrDisplay(L"send()");
 			break;

@@ -7,7 +7,7 @@
 
 #define SERVERIP   "127.0.0.1"
 #define SERVERPORT 9000
-#define BUFSIZE    50
+#define BUFSIZE    108
 
 class Network
 {
