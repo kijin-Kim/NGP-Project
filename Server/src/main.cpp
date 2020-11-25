@@ -8,8 +8,6 @@ int ClientCount = 0;
 HANDLE m_hClientsThreads;// clients threads
 int recvn(SOCKET s, char* buf, int len, int flags);
 
-
-
 int recvn(SOCKET s, char* buf, int len, int flags)
 {
 	int received;
