@@ -77,6 +77,8 @@ public:
 			assert(false && "텍스쳐를 찾을 수 없습니다. 먼저 로드 해주세요");
 
 		texture.Data = m_TextureCache[alias];
+		texture.W = texture.Data->GetWidth();
+		texture.H = texture.Data->GetHeight();
 
 		return texture;
 	}

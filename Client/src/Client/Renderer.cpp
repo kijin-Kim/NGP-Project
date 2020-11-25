@@ -92,30 +92,16 @@ Renderer::~Renderer()
 	delete m_Shader;
 }
 
-void Renderer::RegisterQuads(Quad* quads, unsigned int quadCount)
-{
-	m_Quads.resize(m_Quads.size() + quadCount);
-	m_Quads.insert(m_Quads.end(), quads, &quads[quadCount]);
-}
-
-void Renderer::RegisterQuads(std::vector<Quad> quads)
-{
-	m_Quads.resize(m_Quads.size() + quads.size());
-	m_Quads.insert(m_Quads.end(), quads.begin(), quads.end());
-}
 
 void Renderer::Reset()
 {
 	m_Quads.clear();
 }
 
-void Renderer::Draw()
+void Renderer::Clear()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-	for (const Quad& quad : m_Quads)
-		DrawQuad(quad);
 }
 
 void Renderer::DrawQuad(const Quad& quad)
@@ -170,7 +156,7 @@ void Renderer::DrawQuad(const Quad& quad)
 		image.Data->Bind(0);
 		modelMat = glm::scale(modelMat, glm::vec3(image.W, image.H, 1.0f));
 
-		if (image.W != 0 || image.H != 0)
+		if (image.X != 0 || image.Y != 0)
 		{
 			if (!quad.bShouldFlipVertical)
 			{

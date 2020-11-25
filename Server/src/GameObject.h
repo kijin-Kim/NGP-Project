@@ -4,6 +4,8 @@
 #include <GLFW/glfw3.h>
 #include <string>
 
+#define GRAVITY 9.8f * 40.0f
+
 class GameObject
 {
 public:
@@ -22,8 +24,11 @@ public:
 	unsigned int GetState() const { return m_State; }
 	void SetState(unsigned int state) { m_State = state; }
 
+	glm::vec2 GetVelocity() const { return m_Velocity; }
+	void SetVelocity(const glm::vec2& val) { m_Velocity = val; }
 private:
 	glm::vec2 m_Position = glm::vec2(0.0f, 0.0f);
+	glm::vec2 m_Velocity = glm::vec2(0.0f, 0.0f);
 	std::string m_Tag = "Default";
 	unsigned int m_AnimationIndex = 0;
 	unsigned int m_State = 0;
@@ -50,34 +55,42 @@ public:
 		unsigned int currentAnimationIndex = GetAnimationIndex();
 		SetAnimationIndex(currentAnimationIndex + 1.0f * deltaTime);
 
-		if (input.Key == GLFW_KEY_UNKNOWN)
-			return;
-
 		switch (input.Key)
 		{
 		case GLFW_KEY_LEFT:
-			if (input.Action == GLFW_PRESS)
+			if (input.Action == GLFW_PRESS || input.Action == GLFW_REPEAT)
 			{
-				glm::vec2 currentPosition = GetPosition();
-				SetPosition({ currentPosition.x + 1.0f, currentPosition.y });
+				SetState(Walking);
+				SetVelocity({ -150.0f, GetVelocity().y });
 			}
-				break;
-			if (input.Action == GLFW_REPEAT)
-				break;
 			if (input.Action == GLFW_RELEASE)
-				break;
+			{
+				SetState(Idle);
+				SetVelocity({ 0.0f, GetVelocity().y });
+			}
 			break;
 		case GLFW_KEY_RIGHT:
-			if (input.Action == GLFW_PRESS)
-				break;
-			if (input.Action == GLFW_REPEAT)
-				break;
+			if (input.Action == GLFW_PRESS || input.Action == GLFW_REPEAT)
+			{
+				SetState(Walking);
+				SetVelocity({ 150.0f, GetVelocity().y });
+			}
 			if (input.Action == GLFW_RELEASE)
-				break;
+			{
+				SetState(Idle);
+				SetVelocity({ 0.0f, GetVelocity().y });
+			}
 			break;
 		case GLFW_KEY_UP:
 			if (input.Action == GLFW_PRESS)
-				break;
+			{
+				if (GetState() != Jumping)
+				{
+					SetState(Jumping);
+					SetVelocity({ GetVelocity().x, 300.0f });
+				}
+			}
+			break;
 			if (input.Action == GLFW_REPEAT)
 				break;
 			if (input.Action == GLFW_RELEASE)
@@ -95,7 +108,19 @@ public:
 		default:
 			break;
 		}
+
+
+
+		SetVelocity({ GetVelocity().x, GetVelocity().y - (GRAVITY * deltaTime) });
+
+
+
+
+
+		SetPosition(GetPosition() + GetVelocity() * deltaTime);
 	}
+private:
+	bool m_bIsNotOnGround = false;
 };
 
 class Ball : public GameObject

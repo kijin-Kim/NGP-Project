@@ -27,23 +27,36 @@ int main()
 	GameState* gameState = new GameState();
 	LoginState* loginState = new LoginState();
 
-	
-	
-	
 	char buf[BUFSIZE + 1];
 	Network* network = Network::GetInstance();
 
 
 	network->isServer = true;
 
-	float fTimeElapsed = 0.16f;
-
 	HANDLE hThread = CreateThread(NULL, 0, ListeningThreadProc,
 		NULL, 0, NULL);
 
+	int64_t countsPerSec;
+	QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
+
+	int64_t currentCounts;
+	QueryPerformanceCounter((LARGE_INTEGER*)&currentCounts);
+
+	double secondsPerCount = 1.0 / (double)countsPerSec;
+	int64_t lastCounts = currentCounts;
 
 	while (true)
 	{
+		QueryPerformanceCounter((LARGE_INTEGER*)&currentCounts);
+		float deltaTime = (currentCounts - lastCounts) * secondsPerCount;
+		lastCounts = currentCounts;
+		while (deltaTime < 0.008f)  // FPS Limit
+		{
+			QueryPerformanceCounter((LARGE_INTEGER*)&currentCounts);
+			deltaTime += (currentCounts - lastCounts) * secondsPerCount;
+			lastCounts = currentCounts;
+		}
+		
 		if (g_DataQueue.empty())
 		{
 			for (auto s : g_ClientStates)
@@ -51,10 +64,10 @@ int main()
 				switch (s)
 				{
 				case ClientState::Login:
-					loginState->UpdateData(fTimeElapsed, nullptr);
+					loginState->UpdateData(deltaTime, nullptr);
 					break;
 				case ClientState::Game:
-					gameState->UpdateData(fTimeElapsed, nullptr);
+					gameState->UpdateData(deltaTime, nullptr);
 					break;
 				
 				}
@@ -71,8 +84,11 @@ int main()
 		
 		switch (g_ClientStates[data->ID])
 		{
+		case ClientState::Login:
+			loginState->UpdateData(deltaTime, data);
+			break;
 		case ClientState::Game:
-			g_ProcessedData[data->ID] = gameState->UpdateData(fTimeElapsed, data);
+			g_ProcessedData[data->ID] = gameState->UpdateData(deltaTime, data);
 			break;
 		default:
 			break;
@@ -90,15 +106,18 @@ DWORD ListeningThreadProc(LPVOID)
 
 	Network* network = Network::GetInstance();
 	SOCKET listeningSocket = socket(AF_INET, SOCK_STREAM, 0);
-	network->BindAndListen(listeningSocket);
 
+	/*int option = TRUE;
+	setsockopt(listeningSocket, IPPROTO_TCP, TCP_NODELAY, (const char*)&option, sizeof(option));*/
+
+	network->BindAndListen(listeningSocket);
 
 	while (true)
 	{
 		SOCKET clientSocket = network->Accept(listeningSocket);
-		printf("%d 번째 클라이언트 접속!", clientCount++);
+		printf("%d 번째 클라이언트 접속!", clientCount);
 
-		ClientInformation information = { clientCount, clientSocket };
+		ClientInformation information = { clientCount++, clientSocket };
 
 		// CLIENT 마다 쓰레드를 만들어줌
 		HANDLE hThread = CreateThread(NULL, 0, CommunicationThreadProc, (LPVOID)&information, 0, NULL);
@@ -120,24 +139,28 @@ DWORD CommunicationThreadProc(LPVOID arg)
 	ClientInformation clientInformation = *(ClientInformation*)arg;
 	
 	g_ClientEvents[clientInformation.ID] = CreateEvent(NULL, FALSE, FALSE, NULL);
-
+	
 	while (true) 
 	{
 		int recvBufferSize = 0;
+		int sendBufferSize = 0;
 		IData* recvBuffer = nullptr;
 		switch (g_ClientStates[clientInformation.ID])
 		{
 		case ClientState::Login:
 			recvBufferSize = sizeof(ClientToServerInLogin);
 			recvBuffer = new ClientToServerInLogin();
+			sendBufferSize = sizeof(ServerToClientInLogin);
 			break;
 		case ClientState::Lobby:
 			recvBufferSize = sizeof(ClientToServerInLobby);
 			recvBuffer = new ClientToServerInLobby();
+			sendBufferSize = sizeof(ServerToClientInLobby);
 			break;
 		case ClientState::Game:
 			recvBufferSize = sizeof(ClientToServerInGame);
 			recvBuffer = new ClientToServerInGame();
+			sendBufferSize = sizeof(ServerToClientInGame);
 			break;		
 		default:
 			break;
@@ -151,6 +174,7 @@ DWORD CommunicationThreadProc(LPVOID arg)
 				network->ErrDisplay(L"recv()");
 				break;
 			}
+			recvBuffer->ID = clientInformation.ID;
 
 			if (network->retval == 0)
 				break;
@@ -165,8 +189,8 @@ DWORD CommunicationThreadProc(LPVOID arg)
 
 			// 계산된 데이터를 보냄
 			if (g_ProcessedData[recvBuffer->ID])
-			{
-				network->Send(clientInformation.Socket, (char*)g_ProcessedData[recvBuffer->ID], sizeof(g_ProcessedData[recvBuffer->ID]));
+			{			
+				network->Send(clientInformation.Socket, (char*)g_ProcessedData[recvBuffer->ID], sendBufferSize);
 				delete g_ProcessedData[recvBuffer->ID];
 				g_ProcessedData[recvBuffer->ID] = nullptr;
 			}

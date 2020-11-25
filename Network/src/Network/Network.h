@@ -30,7 +30,6 @@ private:
 public:
 	int retval;
 	bool isServer;
-	int addrlen;
 
 private:
 
