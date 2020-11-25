@@ -297,8 +297,8 @@ public:
 		TextureManager* textureManager = TextureManager::GetInstance();
 		textureManager->LoadTextureAtlas("assets/textures/sprite_sheet.json", "assets/textures/sprite_sheet.png");
 
-		//SetState(new GameState(this));
-		SetState(new LobbyState(this));
+		SetState(new GameState(this));
+		//SetState(new LobbyState(this));
 		//SetState(new LoginState(this));
 	}
 	virtual ~PickachuVolleyBall() = default;

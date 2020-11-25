@@ -36,8 +36,6 @@ Game::Game(int width, int height) :
 	glfwMakeContextCurrent(m_Window);
 	
 	
-
-
 	glfwSetWindowUserPointer(m_Window, &m_UserPointer);
 	glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 		{

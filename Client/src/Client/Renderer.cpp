@@ -120,6 +120,39 @@ void Renderer::Draw()
 
 void Renderer::DrawQuad(const Quad& quad)
 {
+
+	float quadVertices[12] = {
+		-0.5f,  0.5f, 0.0f,
+		 0.5f,  0.5f, 0.0f,
+		 0.5f, -0.5f, 0.0f,
+		-0.5f, -0.5f, 0.0f
+	};
+	unsigned int quadIndices[6] = {
+		0, 2, 1,
+		0, 3, 2
+	};
+
+	float quadTexCoord[8] = {
+		 0.0f, 1.0f,
+		 1.0f, 1.0f,
+		 1.0f, 0.0f,
+		 0.0f, 0.0f
+	};
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_BufferIDs[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_BufferIDs[1]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quadIndices), quadIndices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_BufferIDs[2]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadTexCoord), quadTexCoord, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
+
 	m_Shader->Bind();
 	m_Shader->SetMat4("u_Proj", m_ProjMat);
 
@@ -182,15 +215,15 @@ void Renderer::DrawQuad(const Quad& quad)
 		glBindBuffer(GL_ARRAY_BUFFER, m_BufferIDs[2]);
 
 		float quadTexCoord[8] = {
-				0.0f, 1.0f,
-				1.0f, 1.0f,
+				0.0f, 0.0f,
 				1.0f, 0.0f,
-				0.0f, 0.0f
+				1.0f, 1.0f,
+				0.0f, 1.0f,
 		};
+
 		glBufferData(GL_ARRAY_BUFFER, sizeof(quadTexCoord), quadTexCoord, GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		//modelMat = glm::scale(modelMat, glm::vec3(20.0f, 20.0f, 1.0f));
 		modelMat = glm::scale(modelMat, glm::vec3(quad.Font.Width, quad.Font.Row, 1.0f));
 		m_Shader->SetInt1("u_Texture", 0);
 	}
@@ -204,17 +237,6 @@ void Renderer::DrawQuad(const Quad& quad)
 		m_Shader->SetInt1("u_bToggleColor", 1);
 		m_Shader->SetVec4("u_Color", quad.Color);
 
-		glBindBuffer(GL_ARRAY_BUFFER, m_BufferIDs[2]);
-
-		float quadTexCoord[8] = {
-				0.0f, 0.0f,
-				1.0f, 0.0f,
-				1.0f, 1.0f,
-				0.0f, 1.0f,
-		};
-		glBufferData(GL_ARRAY_BUFFER, sizeof(quadTexCoord), quadTexCoord, GL_STATIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		
 		if(!quad.bUseTexture && !quad.bUseFont)
 			modelMat = glm::scale(modelMat, glm::vec3(quad.Size.x, quad.Size.y, 1.0f));
 	}
