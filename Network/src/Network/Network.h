@@ -15,7 +15,7 @@ public:
 	static Network* GetInstance();
 	void BindAndListen();
 	void Accept();
-	void Connect();
+	void Connect(const char* address);
 	void ClientInfo();
 	void Release(SOCKET sock);
 	void Send(char* buf, int dataSize);
