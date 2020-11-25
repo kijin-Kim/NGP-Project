@@ -63,40 +63,36 @@ int Network::Recvn(SOCKET s, char* buf, int len, int flags)
 
 void Network::Connect(SOCKET sock, const char* address)
 {
-	ZeroMemory(&m_ServerAddr, sizeof(m_ServerAddr));
-	m_ServerAddr.sin_family = AF_INET;
-	m_ServerAddr.sin_addr.s_addr = inet_addr(address);
-	m_ServerAddr.sin_port = htons(SERVERPORT);
+	SOCKADDR_IN serverAddr;
+	ZeroMemory(&serverAddr, sizeof(serverAddr));
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_addr.s_addr = inet_addr(address);
+	serverAddr.sin_port = htons(SERVERPORT);
 
-	retval = connect(sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
+	retval = connect(sock, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
 	if (retval == SOCKET_ERROR)	ErrQuit(L"connect error()");
 }
 
-void Network::ClientInfo(SOCKET sock)
-{
-	addrlen = sizeof(m_ClientAddr);
-	getpeername(sock, (SOCKADDR*)&m_ClientAddr, &addrlen);
-}
 
 void Network::BindAndListen(SOCKET sock)
 {
-	ZeroMemory(&m_ServerAddr, sizeof(m_ServerAddr));
-	m_ServerAddr.sin_family = AF_INET;
-	m_ServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	m_ServerAddr.sin_port = htons(SERVERPORT);
+	SOCKADDR_IN serverAddr;
+	ZeroMemory(&serverAddr, sizeof(serverAddr));
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	serverAddr.sin_port = htons(SERVERPORT);
 
-	retval = bind(sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
+	retval = bind(sock, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
 	if (retval == SOCKET_ERROR) ErrQuit(L"bind error()");
 
 	retval = listen(sock, SOMAXCONN);
 	if (retval == SOCKET_ERROR) ErrQuit(L"listen error()");
 }
 
-void Network::Accept(SOCKET sock)
+SOCKET Network::Accept(SOCKET sock)
 {
-	addrlen = sizeof(m_ClientAddr);
-	m_ClientSock = accept(sock, (SOCKADDR*)&m_ClientAddr, &addrlen);
-	if (m_ClientSock == INVALID_SOCKET) ErrDisplay(L"accept error()");
+	SOCKADDR_IN clientAddr;
+	return accept(sock, (SOCKADDR*)&clientAddr, &addrlen);
 }
 
 void Network::Send(SOCKET sock, char* buf, int dataSize)
@@ -106,7 +102,6 @@ void Network::Send(SOCKET sock, char* buf, int dataSize)
 
 void Network::Recv(SOCKET sock, char* buf, int dataSize)
 {
-	
 	retval = Recvn(sock, buf, dataSize, 0);
 }
 

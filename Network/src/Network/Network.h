@@ -14,9 +14,8 @@ class Network
 public:
 	static Network* GetInstance();
 	void BindAndListen(SOCKET sock);
-	void Accept(SOCKET sock);
+	SOCKET Accept(SOCKET sock);
 	void Connect(SOCKET sock, const char* address);
-	void ClientInfo(SOCKET sock);
 	void Release(SOCKET sock);
 	void Send(SOCKET sock, char* buf, int dataSize);
 	void Recv(SOCKET sock, char* buf, int dataSize);
@@ -29,13 +28,12 @@ private:
 	int Recvn(SOCKET s, char* buf, int len, int flags);
 
 public:
-	SOCKET m_ClientSock;
-	SOCKADDR_IN m_ClientAddr;
 	int retval;
 	bool isServer;
+	int addrlen;
 
 private:
-	SOCKADDR_IN m_ServerAddr;
-	int addrlen;
+
+	
 };
 

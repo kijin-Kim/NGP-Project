@@ -27,25 +27,19 @@ int main()
 	GameState* gameState = new GameState();
 	LoginState* loginState = new LoginState();
 
-	int curretTime = glfwGetTime();
+	
 	
 	
 	char buf[BUFSIZE + 1];
 	Network* network = Network::GetInstance();
-	network->isServer = true;
 
-	HANDLE hThread;
+
+	network->isServer = true;
 
 	float fTimeElapsed = 0.16f;
 
-	hThread = CreateThread(NULL, 0, ListeningThreadProc,
-		(LPVOID)network->m_ClientSock, 0, NULL);
-	if (hThread == NULL) {
-		closesocket(network->m_ClientSock);
-	}
-	else {
-		CloseHandle(hThread);
-	}
+	HANDLE hThread = CreateThread(NULL, 0, ListeningThreadProc,
+		NULL, 0, NULL);
 
 
 	while (true)
@@ -92,26 +86,19 @@ int main()
 
 DWORD ListeningThreadProc(LPVOID)
 {
-	static int ClientCount = 0;
+	static int clientCount = 0;
 
 	Network* network = Network::GetInstance();
-	char buf[BUFSIZE + 1];
-	int id = 0;
-
 	SOCKET listeningSocket = socket(AF_INET, SOCK_STREAM, 0);
 	network->BindAndListen(listeningSocket);
 
 
 	while (true)
 	{
-		network->Accept(listeningSocket);
-		
-		printf("LT_[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d,클라이언트 넘버=%d\n",
-			inet_ntoa(network->m_ClientAddr.sin_addr),
-			ntohs(network->m_ClientAddr.sin_port),
-			ClientCount);
+		SOCKET clientSocket = network->Accept(listeningSocket);
+		printf("%d 번째 클라이언트 접속!", clientCount++);
 
-		ClientInformation information = { ClientCount++, network-> };
+		ClientInformation information = { clientCount, clientSocket };
 
 		// CLIENT 마다 쓰레드를 만들어줌
 		HANDLE hThread = CreateThread(NULL, 0, CommunicationThreadProc, (LPVOID)&information, 0, NULL);
@@ -123,12 +110,12 @@ DWORD ListeningThreadProc(LPVOID)
 	}
 
 	network->Release(listeningSocket);
+
 }
 
 DWORD CommunicationThreadProc(LPVOID arg)
 {
 	Network* network = Network::GetInstance();
-
 
 	ClientInformation clientInformation = *(ClientInformation*)arg;
 	
@@ -151,8 +138,7 @@ DWORD CommunicationThreadProc(LPVOID arg)
 		case ClientState::Game:
 			recvBufferSize = sizeof(ClientToServerInGame);
 			recvBuffer = new ClientToServerInGame();
-			break;
-		
+			break;		
 		default:
 			break;
 		}

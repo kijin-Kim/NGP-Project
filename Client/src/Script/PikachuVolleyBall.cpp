@@ -130,12 +130,12 @@ public:
 		data.ID = 0;
 		data.Input = input;
 		
-		Network::GetInstance()->Send((char*)&data, 108);
+		Network::GetInstance()->Send(m_Game->GetSocket(),(char*)&data, 108);
 	}
 	virtual void ReceiveData() override
 	{
 		ServerToClientInGame data = {};
-		Network::GetInstance()->Recv((char*)&data, 108);
+		Network::GetInstance()->Recv(m_Game->GetSocket(), (char*)&data, 108);
 	}
 
 	virtual void Render() override
