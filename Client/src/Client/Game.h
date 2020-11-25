@@ -11,13 +11,15 @@ public:
 	Game(int width, int height);
 	virtual ~Game();
 
-	bool ConnectToServer() {}
 	void Run();
 
 
 	std::queue<UserInput>& GetInputQueue() { return m_UserPointer.m_InputQueue; }
 	std::queue<wchar_t>& GetCharQueue() { return m_UserPointer.m_CharQueue; }
 
+
+private:
+	void ConnectToServer();
 protected:
 	State* GetState() const;
 	void SetState(State* state);

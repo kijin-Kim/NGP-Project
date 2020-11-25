@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <clocale>
+#include "Network/Network.h"
 
 Game::Game(int width, int height) :
 	m_Width(width),
@@ -67,6 +68,8 @@ Game::Game(int width, int height) :
 
 	m_Renderer = new Renderer(m_Width, m_Height);
 
+	ConnectToServer();
+
 }
 
 Game::~Game()
@@ -74,6 +77,13 @@ Game::~Game()
 	delete m_Renderer;
 	delete m_State;
 	glfwTerminate();
+}
+
+void Game::ConnectToServer()
+{
+	Network* network = Network::GetInstance();
+	network->isServer = false;
+	network->Connect();
 }
 
 void Game::Run()

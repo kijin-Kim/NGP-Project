@@ -2,8 +2,8 @@
 #include "Network/Data.h"
 #define MAX_USER 4
 
-DWORD ListeningThread(LPVOID);
-DWORD ProcessRecvThread(LPVOID arg);
+DWORD ListeningThreadProc(LPVOID);
+DWORD CommunicationThreadProc(LPVOID arg);
 
 int ClientCount = 0;
 HANDLE m_hClientsThreads[MAX_USER];// clients threads
@@ -19,7 +19,7 @@ int main()
 
 	while (1) {
 		
-		hThread = CreateThread(NULL, 0, ListeningThread,
+		hThread = CreateThread(NULL, 0, ListeningThreadProc,
 			(LPVOID)network->m_ClientSock, 0, NULL);
 		if (hThread == NULL) {
 			closesocket(network->m_ClientSock);
@@ -32,7 +32,7 @@ int main()
 	return 1;
 }
 
-DWORD ListeningThread(LPVOID)
+DWORD ListeningThreadProc(LPVOID)
 {
 	Network* network = Network::GetInstance();
 	char buf[BUFSIZE + 1];
@@ -51,7 +51,7 @@ DWORD ListeningThread(LPVOID)
 		// ID Àü¼Û
 		//network->Send((char*)&id, sizeof(int));
 
-		m_hClientsThreads[id]= CreateThread(NULL, 0, ProcessRecvThread,
+		m_hClientsThreads[id]= CreateThread(NULL, 0, CommunicationThreadProc,
 			(LPVOID)network->m_ClientSock,0,NULL);
 	
 		if (NULL == m_hClientsThreads[id]) 
@@ -63,7 +63,7 @@ DWORD ListeningThread(LPVOID)
 	network->Release(network->m_Sock);
 }
 
-DWORD ProcessRecvThread(LPVOID arg)
+DWORD CommunicationThreadProc(LPVOID arg)
 {
 	Network* network = Network::GetInstance();
 	char buf[BUFSIZE + 1];
