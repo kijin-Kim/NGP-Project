@@ -1,4 +1,5 @@
 #include "Network/Network.h"
+<<<<<<< HEAD
 
 #define MAX_USER 4
 DWORD ListeningThread(LPVOID);
@@ -34,6 +35,16 @@ int recvn(SOCKET s, char* buf, int len, int flags)
 
 	return (len - left);//읽은 byte
 }
+=======
+#include "Network/Data.h"
+#define MAX_USER 4
+
+DWORD ListeningThread(LPVOID);
+DWORD ProcessRecvThread(LPVOID arg);
+
+int ClientCount = 0;
+HANDLE m_hClientsThreads[MAX_USER];// clients threads
+>>>>>>> master
 
 
 int main()
@@ -45,7 +56,11 @@ int main()
 	HANDLE hThread;
 
 	while (1) {
+<<<<<<< HEAD
 
+=======
+		
+>>>>>>> master
 		hThread = CreateThread(NULL, 0, ListeningThread,
 			(LPVOID)network->m_ClientSock, 0, NULL);
 		if (hThread == NULL) {
@@ -55,10 +70,13 @@ int main()
 			CloseHandle(hThread);
 		}
 
+<<<<<<< HEAD
 		//Logic 
 
 
 
+=======
+>>>>>>> master
 	}
 	return 1;
 }
@@ -67,7 +85,11 @@ DWORD ListeningThread(LPVOID)
 {
 	Network* network = Network::GetInstance();
 	char buf[BUFSIZE + 1];
+<<<<<<< HEAD
 	int id = ClientCount;
+=======
+	int id = 0;
+>>>>>>> master
 
 	while (1)
 	{
@@ -80,6 +102,7 @@ DWORD ListeningThread(LPVOID)
 		network->ClientInfo();
 
 		// ID 전송
+<<<<<<< HEAD
 		int retval = send(network->m_ClientSock, (char*)&id, sizeof(int), 0);
 		if (SOCKET_ERROR == retval)network->ErrQuit(L"send ID error");
 
@@ -91,11 +114,23 @@ DWORD ListeningThread(LPVOID)
 			closesocket(network->m_ClientSock);
 		}
 
+=======
+		//network->Send((char*)&id, sizeof(int));
+
+		m_hClientsThreads[id]= CreateThread(NULL, 0, ProcessRecvThread,
+			(LPVOID)network->m_ClientSock,0,NULL);
+	
+		if (NULL == m_hClientsThreads[id]) 
+		{
+			closesocket(network->m_ClientSock);
+		}
+>>>>>>> master
 	}
 
 	network->Release(network->m_Sock);
 }
 
+<<<<<<< HEAD
 DWORD CommunicationThread(LPVOID arg)
 {
 	Network* network = Network::GetInstance();
@@ -111,4 +146,45 @@ DWORD CommunicationThread(LPVOID arg)
 
 
 	return 0;
+=======
+DWORD ProcessRecvThread(LPVOID arg)
+{
+	Network* network = Network::GetInstance();
+	char buf[BUFSIZE + 1];
+	ServerToClientInGame p1;
+
+	int id = reinterpret_cast<int>(arg);
+	printf("TCP 접속, ID : %d\n", id);
+
+	//클라이언트 접속 정보
+	network->ClientInfo();
+	while (1)
+	{
+		network->Recv(buf, BUFSIZE);
+		if (network->retval == SOCKET_ERROR) {
+			network->ErrDisplay(L"recv()");
+			break;
+		}
+		else if (network->retval == 0)
+			break;
+		p1 = *(ServerToClientInGame*)buf;
+		printf("%d\n", p1.AnimationData[0].SpriteIndex);
+		printf("%d\n", p1.Scores[0]);
+	
+
+		buf[network->retval] = '\0';
+		printf("[TCP/%s:%d] %s\n", inet_ntoa(network->m_ClientAddr.sin_addr),
+		ntohs(network->m_ClientAddr.sin_port), buf);
+		
+		printf("[TCP 클라이언트] %d바이트를 받았습니다.\n", network->retval);
+		
+		network->Send(buf, BUFSIZE);
+		if (network->retval == SOCKET_ERROR) {
+			network->ErrDisplay(L"send()");
+			break;
+		}
+	}
+	
+	return 1;
+>>>>>>> master
 }

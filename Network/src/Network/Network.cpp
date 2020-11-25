@@ -9,6 +9,7 @@ Network::Network()
 	m_Sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (m_Sock == INVALID_SOCKET)
 		ErrQuit(L"socket()");
+<<<<<<< HEAD
 
 	ZeroMemory(&m_ServerAddr, sizeof(m_ServerAddr));
 	m_ServerAddr.sin_family = AF_INET;
@@ -17,6 +18,8 @@ Network::Network()
 	if (isServer == true)
 		m_ServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	m_ServerAddr.sin_port = htons(SERVERPORT);
+=======
+>>>>>>> master
 }
 
 Network::~Network()
@@ -73,6 +76,7 @@ int Network::Recvn(SOCKET s, char* buf, int len, int flags)
 	return (len - left);
 }
 
+<<<<<<< HEAD
 void Network::Connect()
 {
 	retval = connect(m_Sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
@@ -87,6 +91,32 @@ void Network::ClientInfo()
 
 void Network::BindAndListen()
 {
+=======
+void Network::Connect(const char* address)
+{
+	ZeroMemory(&m_ServerAddr, sizeof(m_ServerAddr));
+	m_ServerAddr.sin_family = AF_INET;
+	m_ServerAddr.sin_addr.s_addr = inet_addr(address);
+	m_ServerAddr.sin_port = htons(SERVERPORT);
+
+	retval = connect(m_Sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
+	if (retval == SOCKET_ERROR)	ErrQuit(L"connect error()");
+}
+
+void Network::ClientInfo()
+{
+	addrlen = sizeof(m_ClientAddr);
+	getpeername(m_ClientSock, (SOCKADDR*)&m_ClientAddr, &addrlen);
+}
+
+void Network::BindAndListen()
+{
+	ZeroMemory(&m_ServerAddr, sizeof(m_ServerAddr));
+	m_ServerAddr.sin_family = AF_INET;
+	m_ServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	m_ServerAddr.sin_port = htons(SERVERPORT);
+
+>>>>>>> master
 	retval = bind(m_Sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
 	if (retval == SOCKET_ERROR) ErrQuit(L"bind error()");
 
