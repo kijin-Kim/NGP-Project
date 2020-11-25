@@ -1,6 +1,9 @@
 #pragma once
 #include <stdint.h>
 
+#pragma pack(push)
+#pragma pack(1)
+
 struct IData  //데이터들을 하나의 컨테이너에 넣기 위한 인터페이스 클래스
 {
 };
@@ -75,3 +78,5 @@ struct ServerToClientInLogin : public IData //서버가 클라이언트에게 보내는 로그�
 {
 	bool bLoginResult;
 };
+
+#pragma pack(pop)

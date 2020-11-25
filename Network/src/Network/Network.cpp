@@ -73,11 +73,10 @@ int Network::Recvn(SOCKET s, char* buf, int len, int flags)
 	return (len - left);
 }
 
-
 void Network::Connect()
 {
 	retval = connect(m_Sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
-	if (retval == SOCKET_ERROR)	ErrQuit(L"connect()");
+	if (retval == SOCKET_ERROR)	ErrQuit(L"connect error()");
 }
 
 void Network::ClientInfo()
@@ -89,51 +88,37 @@ void Network::ClientInfo()
 void Network::BindAndListen()
 {
 	retval = bind(m_Sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
-	if (retval == SOCKET_ERROR) ErrQuit(L"bind()");
+	if (retval == SOCKET_ERROR) ErrQuit(L"bind error()");
 
 	retval = listen(m_Sock, SOMAXCONN);
-	if (retval == SOCKET_ERROR) ErrQuit(L"listen()");
+	if (retval == SOCKET_ERROR) ErrQuit(L"listen error()");
 }
 
 void Network::Accept()
 {
 	addrlen = sizeof(m_ClientAddr);
 	m_ClientSock = accept(m_Sock, (SOCKADDR*)&m_ClientAddr, &addrlen);
-	if (m_ClientSock == INVALID_SOCKET) ErrDisplay(L"accept()");
+	if (m_ClientSock == INVALID_SOCKET) ErrDisplay(L"accept error()");
 }
 
-void Network::ServerSend(char* buf)
+void Network::Send(char* buf, int dataSize)
 {
-	//임시 SendData
-	retval = send(m_ClientSock, buf, BUFSIZE, 0);
-	/*if (retval == SOCKET_ERROR) {
-		ErrDisplay(L"send()");
-	}*/
+	if (isServer == true)
+		retval = send(m_ClientSock, buf, dataSize, 0);
+
+	if (isServer == false)
+		retval = send(m_Sock, buf, dataSize, 0);
 }
 
-void Network::ClientSend(char* buf)
+void Network::Recv(char* buf, int dataSize)
 {
-	//임시 SendData
-	retval = send(m_Sock, buf, BUFSIZE, 0);
+	if (isServer == true)
+		retval = Recvn(m_ClientSock, buf, dataSize, 0);
+
+	if (isServer == false)
+		retval = Recvn(m_Sock, buf, dataSize, 0);
 }
 
-void Network::ServerRecv(char* buf)
-{
-	//임시 RecvData
-	retval = recv(m_ClientSock, buf, BUFSIZE , 0);
-}
-
-void Network::ClientRecv(char* buf)
-{
-	//임시 RecvData
-	retval = Recvn(m_Sock, buf, BUFSIZE, 0);
-	/*if (retval == SOCKET_ERROR) {
-		ErrDisplay(L"recv fixed()");
-		exit(1);
-	}
-	else if (retval == 0)
-		ErrDisplay(L"recv retval = 0 ()");*/
-}
 void Network::Release(SOCKET sock)
 {
 	closesocket(sock);
