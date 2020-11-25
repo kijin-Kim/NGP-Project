@@ -1,12 +1,12 @@
 #pragma once
-#include <stdint.h>
+#include <cstdint>
 
 #pragma pack(push)
 #pragma pack(1)
 
 struct IData  //데이터들을 하나의 컨테이너에 넣기 위한 인터페이스 클래스
 {
-	uint8_t ID;        //클라이언트를 구분하기 위한 id
+	int8_t ID = -1;        //클라이언트를 구분하기 위한 id
 };
 
 

@@ -41,6 +41,8 @@ private:
 	UserPointer m_UserPointer;
 
 	State* m_State;
+
+	SOCKET m_Socket = {};
 };
 
 Game* CreateGameApplication();

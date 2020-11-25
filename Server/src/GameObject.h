@@ -22,7 +22,6 @@ public:
 	unsigned int GetState() const { return m_State; }
 	void SetState(unsigned int state) { m_State = state; }
 
-
 private:
 	glm::vec2 m_Position = glm::vec2(0.0f, 0.0f);
 	std::string m_Tag = "Default";
@@ -48,6 +47,9 @@ public:
 
 	void Update(float deltaTime, UserInput input)
 	{
+		unsigned int currentAnimationIndex = GetAnimationIndex();
+		SetAnimationIndex(currentAnimationIndex + 1.0f * deltaTime);
+
 		if (input.Key == GLFW_KEY_UNKNOWN)
 			return;
 

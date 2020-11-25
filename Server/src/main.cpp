@@ -8,7 +8,6 @@ DWORD ListeningThreadProc(LPVOID);
 DWORD CommunicationThreadProc(LPVOID arg);
 
 
-
 std::queue<IData*> g_DataQueue;
 IData* g_ProcessedData[MAX_USER];
 ClientState g_ClientStates[MAX_USER] = { ClientState::Game, ClientState::Game, ClientState::Game, ClientState::Game, }; //TEMP
@@ -28,12 +27,13 @@ int main()
 	GameState* gameState = new GameState();
 	LoginState* loginState = new LoginState();
 
-
+	int curretTime = glfwGetTime();
+	
 	
 	char buf[BUFSIZE + 1];
 	Network* network = Network::GetInstance();
 	network->isServer = true;
-	network->BindAndListen();
+
 	HANDLE hThread;
 
 	float fTimeElapsed = 0.16f;
@@ -56,9 +56,13 @@ int main()
 			{
 				switch (s)
 				{
+				case ClientState::Login:
+					loginState->UpdateData(fTimeElapsed, nullptr);
+					break;
 				case ClientState::Game:
 					gameState->UpdateData(fTimeElapsed, nullptr);
 					break;
+				
 				}
 			}
 			continue;
@@ -94,17 +98,20 @@ DWORD ListeningThreadProc(LPVOID)
 	char buf[BUFSIZE + 1];
 	int id = 0;
 
+	SOCKET listeningSocket = socket(AF_INET, SOCK_STREAM, 0);
+	network->BindAndListen(listeningSocket);
 
-	while (1)
+
+	while (true)
 	{
-		network->Accept();
+		network->Accept(listeningSocket);
 		
 		printf("LT_[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d,클라이언트 넘버=%d\n",
 			inet_ntoa(network->m_ClientAddr.sin_addr),
 			ntohs(network->m_ClientAddr.sin_port),
 			ClientCount);
 
-		ClientInformation information = { ClientCount++, network->m_ClientSock };
+		ClientInformation information = { ClientCount++, network-> };
 
 		// CLIENT 마다 쓰레드를 만들어줌
 		HANDLE hThread = CreateThread(NULL, 0, CommunicationThreadProc, (LPVOID)&information, 0, NULL);
@@ -115,7 +122,7 @@ DWORD ListeningThreadProc(LPVOID)
 
 	}
 
-	network->Release(network->m_Sock);
+	network->Release(listeningSocket);
 }
 
 DWORD CommunicationThreadProc(LPVOID arg)
@@ -127,29 +134,39 @@ DWORD CommunicationThreadProc(LPVOID arg)
 	
 	g_ClientEvents[clientInformation.ID] = CreateEvent(NULL, FALSE, FALSE, NULL);
 
-	while (1) {
-
+	while (true) 
+	{
 		int recvBufferSize = 0;
 		IData* recvBuffer = nullptr;
 		switch (g_ClientStates[clientInformation.ID])
 		{
+		case ClientState::Login:
+			recvBufferSize = sizeof(ClientToServerInLogin);
+			recvBuffer = new ClientToServerInLogin();
+			break;
+		case ClientState::Lobby:
+			recvBufferSize = sizeof(ClientToServerInLobby);
+			recvBuffer = new ClientToServerInLobby();
+			break;
 		case ClientState::Game:
 			recvBufferSize = sizeof(ClientToServerInGame);
 			recvBuffer = new ClientToServerInGame();
 			break;
+		
 		default:
 			break;
 		}
-		// 클라이언트로부터 데이터를 받음.
-
+		
 		if (recvBuffer)
 		{
-			network->Recv((char*)recvBuffer, recvBufferSize);
+			// 클라이언트로부터 데이터를 받음.
+			network->Recv(clientInformation.Socket, (char*)recvBuffer, recvBufferSize);
 			if (network->retval == SOCKET_ERROR) {
 				network->ErrDisplay(L"recv()");
 				break;
 			}
-			else if (network->retval == 0)
+
+			if (network->retval == 0)
 				break;
 
 			// 데이터를 Queue에 넣음.
@@ -163,14 +180,13 @@ DWORD CommunicationThreadProc(LPVOID arg)
 			// 계산된 데이터를 보냄
 			if (g_ProcessedData[recvBuffer->ID])
 			{
-				network->Send((char*)g_ProcessedData[recvBuffer->ID], 108);
+				network->Send(clientInformation.Socket, (char*)g_ProcessedData[recvBuffer->ID], sizeof(g_ProcessedData[recvBuffer->ID]));
 				delete g_ProcessedData[recvBuffer->ID];
 				g_ProcessedData[recvBuffer->ID] = nullptr;
 			}
 		}
 		
 	}
-
 
 	return 0;
 }

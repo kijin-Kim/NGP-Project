@@ -83,7 +83,8 @@ void Game::ConnectToServer()
 {
 	Network* network = Network::GetInstance();
 	network->isServer = false;
-	network->Connect();
+	m_Socket = socket(AF_INET, SOCK_STREAM, 0);
+	network->Connect(m_Socket, "127.0.0.1");
 }
 
 void Game::Run()

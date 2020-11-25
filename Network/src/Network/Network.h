@@ -1,9 +1,9 @@
 #pragma once
 #include <winsock2.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include <windows.h>
-#include <assert.h>
+#include <cassert>
 
 #define SERVERIP   "127.0.0.1"
 #define SERVERPORT 9000
@@ -13,13 +13,13 @@ class Network
 {
 public:
 	static Network* GetInstance();
-	void BindAndListen();
-	void Accept();
-	void Connect();
-	void ClientInfo();
+	void BindAndListen(SOCKET sock);
+	void Accept(SOCKET sock);
+	void Connect(SOCKET sock, const char* address);
+	void ClientInfo(SOCKET sock);
 	void Release(SOCKET sock);
-	void Send(char* buf, int dataSize);
-	void Recv(char* buf, int dataSize);
+	void Send(SOCKET sock, char* buf, int dataSize);
+	void Recv(SOCKET sock, char* buf, int dataSize);
 	void ErrQuit(const wchar_t* msg);
 	void ErrDisplay(const wchar_t* msg);
 	
@@ -30,7 +30,6 @@ private:
 
 public:
 	SOCKET m_ClientSock;
-	SOCKET m_Sock;
 	SOCKADDR_IN m_ClientAddr;
 	int retval;
 	bool isServer;

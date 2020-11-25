@@ -12,6 +12,8 @@ class State
 public:
 	State() = default;
 	virtual ~State() = default;
+	
+	virtual IData* UpdateData(float deltaTime, IData* data) = 0;
 };
 
 class GameState : public State
@@ -23,13 +25,13 @@ public:
 	}
 	virtual ~GameState() = default;
 
-	IData* UpdateData(float deltaTime, IData* data)
+	virtual IData* UpdateData(float deltaTime, IData* data) override
 	{
 		if (!data)
 		{
-			for (unsigned int i = 0; i < 4; i++)
+			for (auto& pickachu : m_Pickachus)
 			{
-				m_Pickachus[i].Update(deltaTime, { GLFW_KEY_UNKNOWN, 0 });
+				pickachu.Update(deltaTime, { GLFW_KEY_UNKNOWN, 0 });
 			}
 			m_Ball.Update(deltaTime);
 			return nullptr;
@@ -64,7 +66,7 @@ class LobbyState : public State
 public:
 	LobbyState() = default;
 	virtual ~LobbyState() = default;
-
+	virtual IData* UpdateData(float deltaTime, IData* data) override { return nullptr; }
 	
 };
 
@@ -73,6 +75,8 @@ class LoginState : public State
 public:
 	LoginState() = default;
 	virtual ~LoginState() = default;
+
+	virtual IData* UpdateData(float deltaTime, IData* data) override { return nullptr; }
 
 private:
 	std::wstring m_Names[4];
