@@ -24,8 +24,11 @@ int main(void)
 	
 	const char* address = "127.0.0.1";
 	Network* network = Network::GetInstance();
+	SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (sock == INVALID_SOCKET)
+		network->ErrQuit(L"socket()");
 	network->isServer = false;
-	network->Connect(address);
+	network->Connect(sock, address);
 	char buf[BUFSIZE + 1];	
 	
 	for (int i = 0; i < 4; i++)
@@ -35,7 +38,7 @@ int main(void)
 
 		memset(buf, ' ', sizeof(buf));
 
-		network->Send((char*)&p1, BUFSIZE);
+		network->Send(sock,(char*)&p1, BUFSIZE);
 		if (network->retval == SOCKET_ERROR) {
 			network->ErrDisplay(L"send()");
 			break;
@@ -43,7 +46,7 @@ int main(void)
 
 		printf("[TCP 클라이언트] %d바이트를 보냈습니다.\n", network->retval);
 
-		network->Recv(buf, BUFSIZE);
+		network->Recv(sock, buf, BUFSIZE);
 		if (network->retval == SOCKET_ERROR) {
 			network->ErrDisplay(L"recv()");
 			break;
@@ -55,8 +58,8 @@ int main(void)
 		printf("[TCP 클라이언트] %d바이트를 받았습니다.\n", network->retval);
 		printf("[받은 데이터] %s\n", buf);
 	}
-	network->Release(network->m_Sock);
-	//delete game;
+	network->Release(sock);
+
 }
 
 

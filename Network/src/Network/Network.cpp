@@ -5,10 +5,6 @@ Network::Network()
 	WSADATA wsa;
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
 		ErrQuit(L"WSAStartup() Error");
-
-	m_Sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (m_Sock == INVALID_SOCKET)
-		ErrQuit(L"socket()");
 }
 
 Network::~Network()
@@ -65,60 +61,53 @@ int Network::Recvn(SOCKET s, char* buf, int len, int flags)
 	return (len - left);
 }
 
-void Network::Connect(const char* address)
+void Network::Connect(SOCKET sock, const char* address)
 {
 	ZeroMemory(&m_ServerAddr, sizeof(m_ServerAddr));
 	m_ServerAddr.sin_family = AF_INET;
 	m_ServerAddr.sin_addr.s_addr = inet_addr(address);
 	m_ServerAddr.sin_port = htons(SERVERPORT);
 
-	retval = connect(m_Sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
+	retval = connect(sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
 	if (retval == SOCKET_ERROR)	ErrQuit(L"connect error()");
 }
 
-void Network::ClientInfo()
+void Network::ClientInfo(SOCKET sock)
 {
 	addrlen = sizeof(m_ClientAddr);
-	getpeername(m_ClientSock, (SOCKADDR*)&m_ClientAddr, &addrlen);
+	getpeername(sock, (SOCKADDR*)&m_ClientAddr, &addrlen);
 }
 
-void Network::BindAndListen()
+void Network::BindAndListen(SOCKET sock)
 {
 	ZeroMemory(&m_ServerAddr, sizeof(m_ServerAddr));
 	m_ServerAddr.sin_family = AF_INET;
 	m_ServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	m_ServerAddr.sin_port = htons(SERVERPORT);
 
-	retval = bind(m_Sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
+	retval = bind(sock, (SOCKADDR*)&m_ServerAddr, sizeof(m_ServerAddr));
 	if (retval == SOCKET_ERROR) ErrQuit(L"bind error()");
 
-	retval = listen(m_Sock, SOMAXCONN);
+	retval = listen(sock, SOMAXCONN);
 	if (retval == SOCKET_ERROR) ErrQuit(L"listen error()");
 }
 
-void Network::Accept()
+void Network::Accept(SOCKET sock)
 {
 	addrlen = sizeof(m_ClientAddr);
-	m_ClientSock = accept(m_Sock, (SOCKADDR*)&m_ClientAddr, &addrlen);
+	m_ClientSock = accept(sock, (SOCKADDR*)&m_ClientAddr, &addrlen);
 	if (m_ClientSock == INVALID_SOCKET) ErrDisplay(L"accept error()");
 }
 
-void Network::Send(char* buf, int dataSize)
+void Network::Send(SOCKET sock, char* buf, int dataSize)
 {
-	if (isServer == true)
-		retval = send(m_ClientSock, buf, dataSize, 0);
-
-	if (isServer == false)
-		retval = send(m_Sock, buf, dataSize, 0);
+	retval = send(sock, buf, dataSize, 0);
 }
 
-void Network::Recv(char* buf, int dataSize)
+void Network::Recv(SOCKET sock, char* buf, int dataSize)
 {
-	if (isServer == true)
-		retval = Recvn(m_ClientSock, buf, dataSize, 0);
-
-	if (isServer == false)
-		retval = Recvn(m_Sock, buf, dataSize, 0);
+	
+	retval = Recvn(sock, buf, dataSize, 0);
 }
 
 void Network::Release(SOCKET sock)

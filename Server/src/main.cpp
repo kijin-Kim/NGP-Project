@@ -13,16 +13,21 @@ int main()
 {
 	char buf[BUFSIZE + 1];
 	Network* network = Network::GetInstance();
+
+	SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (sock == INVALID_SOCKET)
+		network->ErrQuit(L"socket()");
+
 	network->isServer = true;
-	network->BindAndListen();
+	network->BindAndListen(sock);
 	HANDLE hThread;
 
 	while (1) {
 		
 		hThread = CreateThread(NULL, 0, ListeningThread,
-			(LPVOID)network->m_ClientSock, 0, NULL);
+			(LPVOID)sock, 0, NULL);
 		if (hThread == NULL) {
-			closesocket(network->m_ClientSock);
+			closesocket(sock);
 		}
 		else {
 			CloseHandle(hThread);
@@ -32,21 +37,22 @@ int main()
 	return 1;
 }
 
-DWORD ListeningThread(LPVOID)
+DWORD ListeningThread(LPVOID arg)
 {
 	Network* network = Network::GetInstance();
+	SOCKET clientSock = (SOCKET)arg;
 	char buf[BUFSIZE + 1];
 	int id = 0;
 
 	while (1)
 	{
-		network->Accept();
+		network->Accept(clientSock);
 		++ClientCount;
 		printf("LT_[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d,클라이언트 넘버=%d\n",
 			inet_ntoa(network->m_ClientAddr.sin_addr),
 			ntohs(network->m_ClientAddr.sin_port),
 			ClientCount);
-		network->ClientInfo();
+		network->ClientInfo(clientSock);
 
 		// ID 전송
 		//network->Send((char*)&id, sizeof(int));
@@ -56,16 +62,17 @@ DWORD ListeningThread(LPVOID)
 	
 		if (NULL == m_hClientsThreads[id]) 
 		{
-			closesocket(network->m_ClientSock);
+			closesocket(clientSock);
 		}
 	}
 
-	network->Release(network->m_Sock);
+	network->Release(clientSock);
 }
 
 DWORD ProcessRecvThread(LPVOID arg)
 {
 	Network* network = Network::GetInstance();
+	SOCKET clientSock = (SOCKET)arg;
 	char buf[BUFSIZE + 1];
 	ServerToClientInGame p1;
 
@@ -73,10 +80,10 @@ DWORD ProcessRecvThread(LPVOID arg)
 	printf("TCP 접속, ID : %d\n", id);
 
 	//클라이언트 접속 정보
-	network->ClientInfo();
+	network->ClientInfo(clientSock);
 	while (1)
 	{
-		network->Recv(buf, BUFSIZE);
+		network->Recv(clientSock, buf, BUFSIZE);
 		if (network->retval == SOCKET_ERROR) {
 			network->ErrDisplay(L"recv()");
 			break;
@@ -94,7 +101,7 @@ DWORD ProcessRecvThread(LPVOID arg)
 		
 		printf("[TCP 클라이언트] %d바이트를 받았습니다.\n", network->retval);
 		
-		network->Send(buf, BUFSIZE);
+		network->Send(clientSock, buf, BUFSIZE);
 		if (network->retval == SOCKET_ERROR) {
 			network->ErrDisplay(L"send()");
 			break;
