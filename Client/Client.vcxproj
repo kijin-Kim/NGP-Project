@@ -112,8 +112,15 @@
     <PreBuildEvent>
       <Command>copy "$(SolutionDir)External\GLEW\bin\Release\$(PlatformName)\glew32.dll" "$(OutDir)"
 copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDir)"
-copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\freetype.dll" "$(OutDir)"</Command>
+copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\freetype.dll" "$(OutDir)"
+
+copy "$(SolutionDir)External\GLEW\bin\Release\$(PlatformName)\glew32.dll" "$(ProjectDir)"
+copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(ProjectDir)"
+copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\freetype.dll" "$(ProjectDir)"</Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy "$(OutDir)\Client.exe" "$(ProjectDir)" </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -137,8 +144,15 @@ copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\
     <PreBuildEvent>
       <Command>copy "$(SolutionDir)External\GLEW\bin\Release\$(PlatformName)\glew32.dll" "$(OutDir)"
 copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDir)"
-copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\freetype.dll" "$(OutDir)"</Command>
+copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\freetype.dll" "$(OutDir)"
+
+copy "$(SolutionDir)External\GLEW\bin\Release\$(PlatformName)\glew32.dll" "$(ProjectDir)"
+copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(ProjectDir)"
+copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\freetype.dll" "$(ProjectDir)"</Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy "$(OutDir)\Client.exe" "$(ProjectDir)" </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -158,8 +172,15 @@ copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\
     <PreBuildEvent>
       <Command>copy "$(SolutionDir)External\GLEW\bin\Release\$(PlatformName)\glew32.dll" "$(OutDir)"
 copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDir)"
-copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\freetype.dll" "$(OutDir)"</Command>
+copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\freetype.dll" "$(OutDir)"
+
+copy "$(SolutionDir)External\GLEW\bin\Release\$(PlatformName)\glew32.dll" "$(ProjectDir)"
+copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(ProjectDir)"
+copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\freetype.dll" "$(ProjectDir)"</Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy "$(OutDir)\Client.exe" "$(ProjectDir)" </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -183,8 +204,15 @@ copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\
     <PreBuildEvent>
       <Command>copy "$(SolutionDir)External\GLEW\bin\Release\$(PlatformName)\glew32.dll" "$(OutDir)"
 copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(OutDir)"
-copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\freetype.dll" "$(OutDir)"</Command>
+copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\freetype.dll" "$(OutDir)"
+
+copy "$(SolutionDir)External\GLEW\bin\Release\$(PlatformName)\glew32.dll" "$(ProjectDir)"
+copy "$(SolutionDir)External\GLFW\$(PlatformName)\lib-vc2019\glfw3.dll" "$(ProjectDir)"
+copy "$(SolutionDir)External\FreeType\lib\$(PlatformShortName)\$(Configuration)\freetype.dll" "$(ProjectDir)"</Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy "$(OutDir)\Client.exe" "$(ProjectDir)" </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\External\JsonCpp\jsoncpp.cpp" />

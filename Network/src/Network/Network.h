@@ -1,9 +1,9 @@
 #pragma once
 #include <winsock2.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include <windows.h>
-#include <assert.h>
+#include <cassert>
 
 #define SERVERIP   "127.0.0.1"
 #define SERVERPORT 9000
@@ -28,10 +28,8 @@ private:
 	int Recvn(SOCKET s, char* buf, int len, int flags);
 
 public:
-
 	int retval;
 	bool isServer;
-	int addrlen;
 
 private:
 

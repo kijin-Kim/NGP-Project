@@ -3,12 +3,12 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <assert.h>
-#include "Renderer.h"
 #include "TextureManager.h"
 #include "State.h"
 
 #include <iostream>
 #include <clocale>
+#include "Network/Network.h"
 
 Game::Game(int width, int height) :
 	m_Width(width),
@@ -24,19 +24,14 @@ Game::Game(int width, int height) :
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	glfwSwapInterval(1);
-	
 
 	/* Create a windowed mode window and its OpenGL context */
 
 	m_Window = glfwCreateWindow(m_Width, m_Height, "Pickachu VolleyBall", NULL, NULL);
 	assert(m_Window && "GLFW Window를 생성하는데 실패하였습니다.");
 
-
 	/* Make the window's context current */
 	glfwMakeContextCurrent(m_Window);
-	
-	
-
 
 	glfwSetWindowUserPointer(m_Window, &m_UserPointer);
 	glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -49,15 +44,13 @@ Game::Game(int width, int height) :
 			userPointer->m_InputQueue.push(input);
 		});
 
-
-	glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int c) 
-		{			
+	glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int c)
+		{
 			wchar_t wc = (wchar_t)c;
 			UserPointer* userPointer = (UserPointer*)glfwGetWindowUserPointer(window);
 			userPointer->m_CharQueue.push(wc);
 		});
 
-	
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
 	{
@@ -69,6 +62,10 @@ Game::Game(int width, int height) :
 
 	m_Renderer = new Renderer(m_Width, m_Height);
 
+	ConnectToServer();
+
+
+
 }
 
 Game::~Game()
@@ -78,11 +75,20 @@ Game::~Game()
 	glfwTerminate();
 }
 
+void Game::ConnectToServer()
+{
+	Network* network = Network::GetInstance();
+	network->isServer = false;
+	m_Socket = socket(AF_INET, SOCK_STREAM, 0);
+
+	network->Connect(m_Socket, "127.0.0.1");
+}
+
 void Game::Run()
 {
-	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(m_Window))
 	{
+		m_Renderer->Clear();
 		/* Render here */
 		if (m_State)
 		{
@@ -90,9 +96,6 @@ void Game::Run()
 			m_State->ReceiveData();
 			m_State->Render();
 		}
-
-		m_Renderer->Draw();
-
 		/* Swap front and back buffers */
 		glfwSwapBuffers(m_Window);
 		/* Poll for and process events */

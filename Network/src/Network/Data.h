@@ -1,11 +1,12 @@
 #pragma once
-#include <stdint.h>
+#include <cstdint>
 
 #pragma pack(push)
 #pragma pack(1)
 
 struct IData  //데이터들을 하나의 컨테이너에 넣기 위한 인터페이스 클래스
 {
+	int8_t ID = -1;        //클라이언트를 구분하기 위한 id
 };
 
 
@@ -15,13 +16,12 @@ struct IData  //데이터들을 하나의 컨테이너에 넣기 위한 인터페이스 클래스
 
 struct UserInput
 {
-	uint16_t Key; //클라이언트의 입력 값
+	int32_t Key; //클라이언트의 입력 값
 	uint8_t Action; //클라이언트의 입력 값 상태 PRESSED, RELEASED, REPEATED
 };
 
 struct ClientToServerInGame : public IData //서버가 게임에서 Client에게 넘겨줄(Client가 렌더링할때 필요한) 데이터를 계산하기 위해 필요한 데이터
 {
-	uint8_t ID;        //클라이언트를 구분하기 위한 id
 	UserInput Input;
 };
 
@@ -32,10 +32,10 @@ struct float2
 	float Y = 0;
 };
 
-struct Animation : public IData //클라이언트가 렌더링시 필요한 애니메이션 데이터
+struct Animation
 {
-	uint8_t Status;  // 특정 오브젝트의 상태(예) 점프, 슬라이딩, Idle 등)
-	uint8_t SpriteIndex; //특정 상태에서 출력해야되는 2D 스프라이트의 인덱스
+	uint8_t State;  // 특정 오브젝트의 상태(예) 점프, 슬라이딩, Idle 등)
+	uint8_t AnimationIndex; //특정 상태에서 출력해야되는 2D 스프라이트의 인덱스
 };
 
 struct ServerToClientInGame : public IData //Client가 게임을 렌더링할 때 필요한 계산된 데이터
@@ -70,7 +70,7 @@ struct ServerToClientInLobby : public IData //Client가 로비를 렌더링할 때 필요한
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-struct ClinetToServerInLogin : public IData //클라이언트가 서버에게 보낼 닉네임
+struct ClientToServerInLogin : public IData //클라이언트가 서버에게 보낼 닉네임
 {
 	wchar_t NickName[8];
 };
@@ -80,3 +80,11 @@ struct ServerToClientInLogin : public IData //서버가 클라이언트에게 보내는 로그�
 };
 
 #pragma pack(pop)
+
+
+//////////////////////// GLOBAL ENUM
+
+enum PickachuState
+{
+	Idle = 0, Jumping, Walking, Sliding
+};

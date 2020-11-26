@@ -28,12 +28,8 @@ public:
 	Renderer(int width, int height);
 	~Renderer();
 
-
-	static void RegisterQuads(Quad* quads, unsigned int quadCount);
-	static void RegisterQuads(std::vector<Quad> quads);
-
 	void Reset();
-	void Draw();
+	void Clear();
 	void DrawQuad(const Quad& quad);
 	
 

@@ -91,8 +91,9 @@ void Network::BindAndListen(SOCKET sock)
 
 SOCKET Network::Accept(SOCKET sock)
 {
-	SOCKADDR_IN clientAddr;
-	return accept(sock, (SOCKADDR*)&clientAddr, &addrlen);
+	SOCKADDR_IN clientAddr = {};
+	int clientAddrSize = sizeof(clientAddr);
+	return accept(sock, (SOCKADDR*)&clientAddr, &clientAddrSize);
 }
 
 void Network::Send(SOCKET sock, char* buf, int dataSize)
