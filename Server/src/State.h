@@ -79,6 +79,113 @@ public:
 private:
 	void AABBCollision()
 	{
+		// BALL VS PLAYER
+		AABBBox box1 = m_Ball.GetAABBBox();
+		for (int i = 0; i < _countof(m_Pickachus); i++)
+		{
+			AABBBox box2 = m_Pickachus[i].GetAABBBox();
+			if (box2.Left <= box1.Right &&
+				box1.Left <= box2.Right &&
+				box2.Bottom <= box1.Top &&
+				box1.Bottom <= box2.Top
+				)
+			{
+
+				bool bBallIsOnRight = box1.Right - box2.Right >= 0;
+				bool bBallIsOnTop = box1.Top - box2.Top >= 0;
+
+				if ((box1.Right - box2.Right) <= (box1.Top - box2.Top))
+				{
+					if (bBallIsOnTop)
+					{
+						float collidedHeight = box2.Top - box1.Bottom;
+						m_Ball.SetPosition({ m_Ball.GetPosition().x, m_Ball.GetPosition().y + collidedHeight });
+						m_Ball.SetVelocity({ m_Ball.GetVelocity().x, -m_Ball.GetVelocity().y });
+
+					}
+					else
+					{
+						float collidedHeight = box1.Top - box2.Bottom;
+						m_Ball.SetPosition({ m_Ball.GetPosition().x, m_Ball.GetPosition().y - collidedHeight });
+						m_Ball.SetVelocity({ m_Ball.GetVelocity().x, -m_Ball.GetVelocity().y });
+					}
+				}
+				else
+				{
+					if (bBallIsOnRight)
+					{
+						float collidedWidth = box2.Right - box1.Left;
+						m_Ball.SetPosition({ m_Ball.GetPosition().x + collidedWidth, m_Ball.GetPosition().y });
+						m_Ball.SetVelocity({ -m_Ball.GetVelocity().x, m_Ball.GetVelocity().y });
+					}
+					else
+					{
+						float collidedWidth = box1.Right - box2.Left;
+						m_Ball.SetPosition({ m_Ball.GetPosition().x - collidedWidth, m_Ball.GetPosition().y });
+						m_Ball.SetVelocity({ -m_Ball.GetVelocity().x, m_Ball.GetVelocity().y });
+					}
+			 
+
+				}
+				
+
+			}
+		}
+
+		AABBBox box2 = {};
+		box2.Left = 200.0f;
+		box2.Right = 230.0f;
+		box2.Top = 304.0f - 170.0f;
+		box2.Bottom = 304.0f - 267.0f;
+
+		if (box2.Left <= box1.Right &&
+			box1.Left <= box2.Right &&
+			box2.Bottom <= box1.Top &&
+			box1.Bottom <= box2.Top
+			)
+		{
+			bool bBallIsOnRight = box1.Right - box2.Right >= 0;
+			bool bBallIsOnTop = box1.Top - box2.Top >= 0;
+
+
+			if ((box1.Right - box2.Right) <= (box1.Top - box2.Top))
+			{
+				if (bBallIsOnTop)
+				{
+					float collidedHeight = box2.Top - box1.Bottom;
+					m_Ball.SetPosition({ m_Ball.GetPosition().x, m_Ball.GetPosition().y + collidedHeight });
+					m_Ball.SetVelocity({ m_Ball.GetVelocity().x, -m_Ball.GetVelocity().y });
+
+				}
+				else
+				{
+					float collidedHeight = box1.Top - box2.Bottom;
+					m_Ball.SetPosition({ m_Ball.GetPosition().x, m_Ball.GetPosition().y - collidedHeight });
+					m_Ball.SetVelocity({ m_Ball.GetVelocity().x, -m_Ball.GetVelocity().y });
+				}
+			}
+			else
+			{
+				if (bBallIsOnRight)
+				{
+					float collidedWidth = box2.Right - box1.Left;
+					m_Ball.SetPosition({ m_Ball.GetPosition().x + collidedWidth, m_Ball.GetPosition().y });
+					m_Ball.SetVelocity({ -m_Ball.GetVelocity().x, m_Ball.GetVelocity().y });
+				}
+				else
+				{
+					float collidedWidth = box1.Right - box2.Left;
+					m_Ball.SetPosition({ m_Ball.GetPosition().x - collidedWidth, m_Ball.GetPosition().y });
+					m_Ball.SetVelocity({ -m_Ball.GetVelocity().x, m_Ball.GetVelocity().y });
+				}
+			}
+			
+		}
+
+
+		// BALL VS NET
+		
+
 	}
 
 private:

@@ -6,13 +6,28 @@
 
 #define GRAVITY 9.8f * 40.0f
 
+struct AABBBox
+{
+	float Left = 0.0f;
+	float Top = 0.0f;
+	float Right = 0.0f;
+	float Bottom = 0.0f;
+};
+
 class GameObject
 {
 public:
 	GameObject() = default;
 	virtual ~GameObject() = default;
 
-	void SetPosition(const glm::vec2& position) { m_Position = position; }
+	void SetPosition(const glm::vec2& position) 
+	{ 
+		m_Position = position; 
+		m_AABB.Left = m_Position.x - m_Size.x / 2.0f;
+		m_AABB.Top = m_Position.y + m_Size.y / 2.0f;
+		m_AABB.Right = m_Position.x + m_Size.x / 2.0f;
+		m_AABB.Bottom = m_Position.y - m_Size.y / 2.0f;
+	}
 	const glm::vec2& GetPosition() const { return m_Position; }
 
 	void SetTag(const std::string& tag) { m_Tag = tag; }
@@ -24,14 +39,24 @@ public:
 	unsigned int GetState() const { return m_State; }
 	void SetState(unsigned int state) { m_State = state; }
 
-	glm::vec2 GetVelocity() const { return m_Velocity; }
+	const glm::vec2& GetVelocity() const { return m_Velocity; }
 	void SetVelocity(const glm::vec2& val) { m_Velocity = val; }
+
+	void SetAABBBox(const AABBBox& aabb) { m_AABB = aabb; }
+	const AABBBox& GetAABBBox() const { return m_AABB; }
+
+	void SetSize(const glm::vec2& size) { m_Size = size; }
+	const glm::vec2& GetSize() const { return m_Size; }
+	
 private:
 	glm::vec2 m_Position = glm::vec2(0.0f, 0.0f);
 	glm::vec2 m_Velocity = glm::vec2(0.0f, 0.0f);
+	glm::vec2 m_Size = glm::vec2(0.0f, 0.0f);
 	std::string m_Tag = "Default";
 	float m_AnimationIndex = 0.0f;
 	unsigned int m_State = 0;
+
+	AABBBox m_AABB = {};
 };
 
 class Pickachu : public GameObject
@@ -40,6 +65,7 @@ public:
 	Pickachu()
 	{
 		SetTag("Pickachu");
+		SetSize({ 16.0f, 32.0f});
 	}
 
 	virtual ~Pickachu() = default;
@@ -158,14 +184,15 @@ public:
 	Ball()
 	{
 		SetTag("Ball");
-		SetVelocity({ 100.0f, 100.0f });
+		SetVelocity({ 50.0f, 50.0f });
+		SetSize({ 32.0f, 32.0f});
 	}
 
 	virtual ~Ball() = default;
 
 	void Update(float deltaTime)
 	{
-		//SetVelocity({ GetVelocity().x, GetVelocity().y - (GRAVITY * deltaTime) });
+		SetVelocity({ GetVelocity().x, GetVelocity().y - (GRAVITY / 10.0f * deltaTime) });
 
 		float currentAnimationIndex = GetAnimationIndex();
 		SetAnimationIndex(currentAnimationIndex + 2.0f * deltaTime);
