@@ -208,7 +208,7 @@ public:
 		else if (GetPosition().y > 16.0f * 18.0f)
 		{
 			SetPosition({ GetPosition().x, 16.0f * 18.0f });
-			SetVelocity({ -GetVelocity().x, -GetVelocity().y });
+			SetVelocity({ GetVelocity().x, -GetVelocity().y });
 		}
 
 		if (GetPosition().x < 16.0f * 2.0f  )
