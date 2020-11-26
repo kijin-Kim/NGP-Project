@@ -10,9 +10,10 @@
 #include <clocale>
 #include "Network/Network.h"
 
-Game::Game(int width, int height) :
+Game::Game(int width, int height, const std::string& serverIP) :
 	m_Width(width),
-	m_Height(height)
+	m_Height(height),
+	m_ServerIP(serverIP)
 {
 	std::locale::global(std::locale(""));
 	/* Initialize the library */
@@ -64,8 +65,6 @@ Game::Game(int width, int height) :
 
 	ConnectToServer();
 
-
-
 }
 
 Game::~Game()
@@ -81,7 +80,7 @@ void Game::ConnectToServer()
 	network->isServer = false;
 	m_Socket = socket(AF_INET, SOCK_STREAM, 0);
 
-	network->Connect(m_Socket, "127.0.0.1");
+	network->Connect(m_Socket, m_ServerIP.c_str());
 }
 
 void Game::Run()
