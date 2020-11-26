@@ -10,7 +10,7 @@ class State;
 class Game
 {
 public:
-	Game(int width, int height);
+	Game(int width, int height, const std::string& serverIP);
 	virtual ~Game();
 
 	void Run();
@@ -55,8 +55,10 @@ private:
 
 	unsigned int m_ID;
 
+	std::string m_ServerIP;
+
 };
 
-Game* CreateGameApplication();
+Game* CreateGameApplication(const std::string& serverIP);
 
-#define RegisterApplication(x, width, height) Game* CreateGameApplication() { return new x(width, height); }
+#define RegisterApplication(x, width, height) Game* CreateGameApplication(const std::string& serverIP) { return new x(width, height, serverIP); }

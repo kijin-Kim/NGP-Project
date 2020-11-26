@@ -317,7 +317,7 @@ private:
 class PickachuVolleyBall : public Game
 {
 public:
-	PickachuVolleyBall(int width, int height) : Game(width, height)
+	PickachuVolleyBall(int width, int height, const std::string& serverIP) : Game(width, height, serverIP)
 	{
 		// Pre Load Textures
 		TextureManager* textureManager = TextureManager::GetInstance();
