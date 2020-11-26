@@ -86,5 +86,10 @@ struct ServerToClientInLogin : public IData //서버가 클라이언트에게 보내는 로그�
 
 enum PickachuState
 {
-	Idle = 0, Jumping, Walking, Sliding
+	Pickachu_Idle = 0, Pickachu_Jumping, Pickachu_Walking, Pickachu_PowerHiting
+};
+
+enum BallState
+{
+	Ball_Idle = 4, Ball_PowerHiting
 };

@@ -57,6 +57,17 @@ public:
 
 			m_Ball.Update(deltaTime);
 
+			if (m_Ball.GetPosition().y <= 16.0f * 4.0f)
+			{
+				m_Ball.SetPosition({ m_Ball.GetPosition().x, 16.0f * 4.0f });
+				m_Ball.SetVelocity({ m_Ball.GetVelocity().x, -m_Ball.GetVelocity().y });
+
+				if (m_Ball.GetPosition().x < 190)
+					m_Scores[0]++;
+				else if (m_Ball.GetPosition().x > 240)
+					m_Scores[1]++;
+			}
+
 			m_Pickachus[0].SetPosition(glm::clamp(m_Pickachus[0].GetPosition(), { 8.0f + 16.0f * 1, 16.0f * 4.0f }, { 8.0f + 16.0f * 11, 304.0f}));
 			m_Pickachus[1].SetPosition(glm::clamp(m_Pickachus[1].GetPosition(), { 8.0f + 16.0f * 1, 16.0f * 4.0f }, { 8.0f + 16.0f * 11, 304.0f }));
 			m_Pickachus[2].SetPosition(glm::clamp(m_Pickachus[2].GetPosition(), { 8.0f + 16.0f * 15, 16.0f * 4.0f }, { 8.0f + 16.0f * 25, 304.0f }));
@@ -73,6 +84,8 @@ public:
 		newOutData->ObjectPositions[4] = { m_Ball.GetPosition().x, m_Ball.GetPosition().y };
 		newOutData->AnimationData[4].AnimationIndex = m_Ball.GetAnimationIndex();
 		newOutData->AnimationData[4].State = m_Ball.GetState();
+		newOutData->Scores[0] = m_Scores[0];
+		newOutData->Scores[1] = m_Scores[1];
 
 		return newOutData;
 	}
@@ -84,6 +97,8 @@ private:
 		for (int i = 0; i < _countof(m_Pickachus); i++)
 		{
 			AABBBox box2 = m_Pickachus[i].GetAABBBox();
+			bool bShouldPowerHit = m_Pickachus[i].GetState() == PickachuState::Pickachu_PowerHiting;
+			bool bBallWasPowerHiting = m_Ball.GetState() == BallState::Ball_PowerHiting;
 			if (box2.Left <= box1.Right &&
 				box1.Left <= box2.Right &&
 				box2.Bottom <= box1.Top &&
@@ -101,7 +116,6 @@ private:
 						float collidedHeight = box2.Top - box1.Bottom;
 						m_Ball.SetPosition({ m_Ball.GetPosition().x, m_Ball.GetPosition().y + collidedHeight });
 						m_Ball.SetVelocity({ m_Ball.GetVelocity().x, -m_Ball.GetVelocity().y });
-
 					}
 					else
 					{
@@ -128,6 +142,16 @@ private:
 
 				}
 				
+				if (bShouldPowerHit)
+				{
+					m_Ball.SetVelocity({ m_Ball.GetVelocity().x * 1.5f, m_Ball.GetVelocity().y * 1.5f });
+					m_Ball.SetState(BallState::Ball_PowerHiting);
+				}
+				else if (bBallWasPowerHiting)
+				{
+					m_Ball.SetVelocity({ m_Ball.GetVelocity().x / 2.0f, m_Ball.GetVelocity().y / 2.0f });
+					m_Ball.SetState(BallState::Ball_Idle);
+				}
 
 			}
 		}

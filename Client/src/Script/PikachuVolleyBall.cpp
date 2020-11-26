@@ -31,11 +31,18 @@ public:
 		m_PickachuJumping[3] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_1_3.png");
 		m_PickachuJumping[4] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_1_4.png");
 
-		m_BallAnimation[0] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_0.png");
-		m_BallAnimation[1] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_1.png");
-		m_BallAnimation[2] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_2.png");
-		m_BallAnimation[3] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_3.png");
-		m_BallAnimation[4] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_4.png");
+		m_PickachuPowerHiting[0] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_2_0.png");
+		m_PickachuPowerHiting[1] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_2_1.png");
+
+		m_BallIdle[0] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_0.png");
+		m_BallIdle[1] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_1.png");
+		m_BallIdle[2] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_2.png");
+		m_BallIdle[3] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_3.png");
+		m_BallIdle[4] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_4.png");
+
+		m_BallPowerHiting[0] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_hyper.png");
+		m_BallPowerHiting[1] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_trail.png");
+
 
 		m_Numbers[0] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "number/number_0.png");
 		m_Numbers[1] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "number/number_1.png");
@@ -80,11 +87,17 @@ public:
 		m_ObjectsQuad[4].Image = ball;
 
 
-		m_ScoreQuads[0].Position = glm::vec2(8.0f + 16.0f * 7, 16.0f * 17);
+		m_ScoreQuads[0].Position = glm::vec2(8.0f + 16.0f * 6, 16.0f * 17);
 		m_ScoreQuads[0].Image = m_Numbers[0];
-
-		m_ScoreQuads[1].Position = glm::vec2(8.0f + 16.0f * (7 + 13), 16.0f * 17);
+		m_ScoreQuads[1].Position = glm::vec2(8.0f + 16.0f * 8, 16.0f * 17);
 		m_ScoreQuads[1].Image = m_Numbers[0];
+
+
+		m_ScoreQuads[2].Position = glm::vec2(8.0f + 16.0f * (7 + 13), 16.0f * 17);
+		m_ScoreQuads[2].Image = m_Numbers[0];
+		m_ScoreQuads[3].Position = glm::vec2(8.0f + 16.0f * (7 + 13 + 2), 16.0f * 17);
+		m_ScoreQuads[3].Image = m_Numbers[0];
+
 	} 
 
 	virtual ~GameState() = default;
@@ -111,7 +124,6 @@ public:
 	{
 		ServerToClientInGame data = {};
 		Network::GetInstance()->Recv(m_Game->GetSocket(), (char*)&data, sizeof(data));
-
 		
 		for (int i = 0; i < _countof(m_ObjectsQuad); i++)
 		{
@@ -123,12 +135,15 @@ public:
 			{
 				switch (data.AnimationData[i].State)
 				{
-				case Walking:
-				case Idle:
+				case PickachuState::Pickachu_Walking:
+				case PickachuState::Pickachu_Idle:
 					m_ObjectsQuad[i].Image = m_PickachuWalking[data.AnimationData[i].AnimationIndex];
 					break;
-				case Jumping:
+				case PickachuState::Pickachu_Jumping:
 					m_ObjectsQuad[i].Image = m_PickachuJumping[data.AnimationData[i].AnimationIndex];
+					break;
+				case PickachuState::Pickachu_PowerHiting:
+					m_ObjectsQuad[i].Image = m_PickachuPowerHiting[data.AnimationData[i].AnimationIndex];
 					break;
 				default:
 					break;
@@ -139,9 +154,30 @@ public:
 			}
 			else
 			{
-				m_ObjectsQuad[i].Image = m_BallAnimation[data.AnimationData[i].AnimationIndex];
+				switch (data.AnimationData[i].State)
+				{
+				case BallState::Ball_Idle:
+					m_ObjectsQuad[i].Image = m_BallIdle[data.AnimationData[i].AnimationIndex];
+					break;
+				case BallState::Ball_PowerHiting:
+					if(data.AnimationData[i].AnimationIndex == 2)
+						m_ObjectsQuad[i].Image = m_BallIdle[data.AnimationData[i].AnimationIndex];
+					m_ObjectsQuad[i].Image = m_BallPowerHiting[data.AnimationData[i].AnimationIndex];
+					break;
+				default:
+					break;
+				}
+				
 			}
 	
+		}
+
+		for (int i = 0; i < _countof(data.Scores); i++)
+		{
+			if (data.Scores[i] > 15)
+				break;
+			m_ScoreQuads[0 + i * 2].Image = m_Numbers[data.Scores[i] / 10];
+			m_ScoreQuads[1 + i * 2].Image = m_Numbers[data.Scores[i] % 10];
 		}
 	}
 
@@ -158,15 +194,19 @@ public:
 
 private:
 	Renderer::Quad m_ObjectsQuad[5];
-	Renderer::Quad m_ScoreQuads[2];
+	Renderer::Quad m_ScoreQuads[4];
 	Renderer::Quad m_MapQuad;
 	
 	Texture m_Numbers[10];
 
-	// PICKCHU ANIMATION TEXTURES
+	// ANIMATION TEXTURES
 	Texture m_PickachuWalking[5];
 	Texture m_PickachuJumping[5];
-	Texture m_BallAnimation[5];
+	Texture m_PickachuPowerHiting[2];
+	Texture m_BallPowerHiting[2];
+
+	Texture m_BallIdle[5];
+	
 
 	ServerToClientInGame m_Data = {};
 };

@@ -72,13 +72,16 @@ public:
 
 	void Update(float deltaTime, UserInput input)
 	{
+
+		static float powerHitRemainTimer = 0.0f;
+		static float powerHitCoolTimer = 0.3f;
 		
 		if (GetPosition().y <= 16.0f * 4.0f)
-			SetState(Idle);
+			SetState(PickachuState::Pickachu_Idle);
 
 		switch (GetState())
 		{
-		case Walking:
+		case PickachuState::Pickachu_Walking:
 		{
 			float currentAnimationIndex = GetAnimationIndex();
 			SetAnimationIndex(currentAnimationIndex + 5.0f * deltaTime);
@@ -86,7 +89,7 @@ public:
 				SetAnimationIndex(0.0f);
 			break;
 		}
-		case Idle:
+		case PickachuState::Pickachu_Idle:
 		{
 			float currentAnimationIndex = GetAnimationIndex();
 			SetAnimationIndex(currentAnimationIndex + 5.0f * deltaTime);
@@ -94,14 +97,32 @@ public:
 				SetAnimationIndex(0.0f);
 			break;
 		}
-		case Jumping:
+		case PickachuState::Pickachu_Jumping:
 		{
+			powerHitCoolTimer += deltaTime;
 			float currentAnimationIndex = GetAnimationIndex();
 			SetAnimationIndex(currentAnimationIndex + 30.0f * deltaTime);
 			if (GetAnimationIndex() > 4.0f)
 				SetAnimationIndex(0.0f);
 			break;
 		}
+		case PickachuState::Pickachu_PowerHiting:
+		{
+			float currentAnimationIndex = GetAnimationIndex();
+			SetAnimationIndex(currentAnimationIndex + 10.0f * deltaTime);
+			if (GetAnimationIndex() > 2.0f)
+				SetAnimationIndex(0.0f);
+
+			powerHitRemainTimer += deltaTime;
+
+			if (powerHitRemainTimer >= 1.0f)
+			{
+				SetState(Pickachu_Jumping);
+				powerHitRemainTimer = 0.0f;
+			}
+			break;
+		}
+			
 		default:
 			break;
 		}
@@ -110,17 +131,17 @@ public:
 		case GLFW_KEY_LEFT:
 			if (input.Action == GLFW_PRESS || input.Action == GLFW_REPEAT)
 			{
-				if (GetState() != Jumping)
+				if (GetState() != PickachuState::Pickachu_Jumping && GetState() != PickachuState::Pickachu_PowerHiting)
 				{
-					SetState(Walking);
+					SetState(PickachuState::Pickachu_Walking);
 				}
 				SetVelocity({ -150.0f, GetVelocity().y });
 			}
 			if (input.Action == GLFW_RELEASE)
 			{
-				if (GetState() != Jumping)
+				if (GetState() != PickachuState::Pickachu_Jumping && GetState() != PickachuState::Pickachu_PowerHiting)
 				{
-					SetState(Idle);
+					SetState(PickachuState::Pickachu_Idle);
 				}
 				SetVelocity({ 0.0f, GetVelocity().y });
 			}
@@ -128,17 +149,17 @@ public:
 		case GLFW_KEY_RIGHT:
 			if (input.Action == GLFW_PRESS || input.Action == GLFW_REPEAT)
 			{
-				if (GetState() != Jumping)
+				if (GetState() != PickachuState::Pickachu_Jumping && GetState() != PickachuState::Pickachu_PowerHiting)
 				{
-					SetState(Walking);
+					SetState(PickachuState::Pickachu_Walking);
 				}
 				SetVelocity({ 150.0f, GetVelocity().y });
 			}
 			if (input.Action == GLFW_RELEASE)
 			{
-				if (GetState() != Jumping)
+				if (GetState() != PickachuState::Pickachu_Jumping && GetState() != PickachuState::Pickachu_PowerHiting)
 				{
-					SetState(Idle);
+					SetState(PickachuState::Pickachu_Idle);
 				}
 				SetVelocity({ 0.0f, GetVelocity().y });
 			}
@@ -146,9 +167,9 @@ public:
 		case GLFW_KEY_UP:
 			if (input.Action == GLFW_PRESS)
 			{
-				if (GetState() != Jumping)
+				if (GetState() != PickachuState::Pickachu_Jumping && GetState() != PickachuState::Pickachu_PowerHiting)
 				{
-					SetState(Jumping);
+					SetState(Pickachu_Jumping);
 					SetVelocity({ GetVelocity().x, 300.0f });
 				}
 			}
@@ -160,6 +181,14 @@ public:
 			break;
 		case GLFW_KEY_SPACE:
 			if (input.Action == GLFW_PRESS)
+				if (GetState() == PickachuState::Pickachu_Jumping)
+				{
+					if (powerHitCoolTimer >= 0.3f)
+						powerHitCoolTimer = 0.0f;
+					else
+						break;
+					SetState(PickachuState::Pickachu_PowerHiting);
+				}
 				break;
 			if (input.Action == GLFW_REPEAT)
 				break;
@@ -186,6 +215,7 @@ public:
 		SetTag("Ball");
 		SetVelocity({ 50.0f, 50.0f });
 		SetSize({ 32.0f, 32.0f});
+		SetState(BallState::Ball_Idle);
 	}
 
 	virtual ~Ball() = default;
@@ -194,34 +224,53 @@ public:
 	{
 		SetVelocity({ GetVelocity().x, GetVelocity().y - (GRAVITY / 10.0f * deltaTime) });
 
-		float currentAnimationIndex = GetAnimationIndex();
-		SetAnimationIndex(currentAnimationIndex + 2.0f * deltaTime);
-		if (GetAnimationIndex() > 4.0f)
-			SetAnimationIndex(0.0f);
+		switch (GetState())
+		{
+		case BallState::Ball_Idle:
+		{
+			float currentAnimationIndex = GetAnimationIndex();
+			SetAnimationIndex(currentAnimationIndex + 2.0f * deltaTime);
+			if (GetAnimationIndex() > 4.0f)
+				SetAnimationIndex(0.0f);
+			break;
+		}
+		case BallState::Ball_PowerHiting:
+		{
+			float currentAnimationIndex = GetAnimationIndex();
+			SetAnimationIndex(currentAnimationIndex + 2.0f * deltaTime);
+			if (GetAnimationIndex() > 3.0f)
+				SetAnimationIndex(0.0f);
+			break;
+		}
+			
+		default:
+			break;
+		}
 		
-
+	
 		if (GetPosition().y < 16.0f * 4.0f)
 		{
 			SetPosition({ GetPosition().x, 16.0f * 4.0f });
 			SetVelocity({ GetVelocity().x, -GetVelocity().y });
 		}
-		else if (GetPosition().y > 16.0f * 18.0f)
+		else if (GetPosition().y > 16.0f * 19.0f)
 		{
-			SetPosition({ GetPosition().x, 16.0f * 18.0f });
+			SetPosition({ GetPosition().x, 16.0f * 19.0f });
 			SetVelocity({ GetVelocity().x, -GetVelocity().y });
 		}
 
-		if (GetPosition().x < 16.0f * 2.0f  )
+		if (GetPosition().x < 16.0f * 1.0f  )
 		{
-			SetPosition({ 16.0f * 2.0f, GetPosition().y });
+			SetPosition({ 16.0f * 1.0f, GetPosition().y });
 			SetVelocity({ -GetVelocity().x, GetVelocity().y });
 		}
-		else if (GetPosition().x > 16.0f * 24.0f)
+		else if (GetPosition().x > 16.0f * 25.0f)
 		{
-			SetPosition({ 16.0f * 24.0f, GetPosition().y });
+			SetPosition({ 16.0f * 25.0f, GetPosition().y });
 			SetVelocity({ -GetVelocity().x, GetVelocity().y });
 		}
-
 		SetPosition(GetPosition() + GetVelocity() * deltaTime);
+		if(GetState() == BallState::Ball_Idle)
+			SetVelocity(glm::clamp(GetVelocity(), { -100.0f, -100.0f }, { 100.0f, 100.0f }));
 	}
 };
