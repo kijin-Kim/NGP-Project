@@ -16,7 +16,26 @@ public:
 
 		// TEMP
 		Texture pickchu = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_0_0.png");
+		Texture ball = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_0.png");
 
+
+		m_PickachuWalking[0] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_0_0.png");
+		m_PickachuWalking[1] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_0_1.png");
+		m_PickachuWalking[2] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_0_2.png");
+		m_PickachuWalking[3] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_0_3.png");
+		m_PickachuWalking[4] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_0_4.png");
+
+		m_PickachuJumping[0] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_1_0.png");
+		m_PickachuJumping[1] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_1_1.png");
+		m_PickachuJumping[2] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_1_2.png");
+		m_PickachuJumping[3] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_1_3.png");
+		m_PickachuJumping[4] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_1_4.png");
+
+		m_BallAnimation[0] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_0.png");
+		m_BallAnimation[1] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_1.png");
+		m_BallAnimation[2] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_2.png");
+		m_BallAnimation[3] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_3.png");
+		m_BallAnimation[4] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_4.png");
 
 		m_Numbers[0] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "number/number_0.png");
 		m_Numbers[1] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "number/number_1.png");
@@ -57,6 +76,10 @@ public:
 		m_ObjectsQuad[3].Color = glm::vec4(0.7f, 0.7f, 0.0f, 1.0f);
 
 
+		m_ObjectsQuad[4].Position = glm::vec2(8.0f + 16.0f * 2, 16.0f * 13);
+		m_ObjectsQuad[4].Image = ball;
+
+
 		m_ScoreQuads[0].Position = glm::vec2(8.0f + 16.0f * 7, 16.0f * 17);
 		m_ScoreQuads[0].Image = m_Numbers[0];
 
@@ -89,15 +112,37 @@ public:
 		ServerToClientInGame data = {};
 		Network::GetInstance()->Recv(m_Game->GetSocket(), (char*)&data, sizeof(data));
 
+		
 		for (int i = 0; i < _countof(m_ObjectsQuad); i++)
 		{
 			m_ObjectsQuad[i].Position.x = data.ObjectPositions[i].X;
 			m_ObjectsQuad[i].Position.y = data.ObjectPositions[i].Y;
+			
+			// PICKACHUS SPECIFICE
+			if (i != 4)
+			{
+				switch (data.AnimationData[i].State)
+				{
+				case Walking:
+				case Idle:
+					m_ObjectsQuad[i].Image = m_PickachuWalking[data.AnimationData[i].AnimationIndex];
+					break;
+				case Jumping:
+					m_ObjectsQuad[i].Image = m_PickachuJumping[data.AnimationData[i].AnimationIndex];
+					break;
+				default:
+					break;
+				}
 
-			if(i == data.ID)
-				m_ObjectsQuad[data.ID].bUseColor = false;
+				if (i == data.ID)
+					m_ObjectsQuad[data.ID].bUseColor = false;
+			}
+			else
+			{
+				m_ObjectsQuad[i].Image = m_BallAnimation[data.AnimationData[i].AnimationIndex];
+			}
+	
 		}
-		
 	}
 
 	virtual void Render() override
@@ -117,6 +162,11 @@ private:
 	Renderer::Quad m_MapQuad;
 	
 	Texture m_Numbers[10];
+
+	// PICKCHU ANIMATION TEXTURES
+	Texture m_PickachuWalking[5];
+	Texture m_PickachuJumping[5];
+	Texture m_BallAnimation[5];
 
 	ServerToClientInGame m_Data = {};
 };

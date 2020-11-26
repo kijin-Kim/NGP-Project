@@ -25,11 +25,16 @@ public:
 		m_Pickachus[1].SetPosition(glm::vec2(8.0f + 16.0f * (2 + 4), 16.0f * 4));
 		m_Pickachus[2].SetPosition(glm::vec2(8.0f + 16.0f * (19 - 2 + 4), 16.0f * 4));
 		m_Pickachus[3].SetPosition(glm::vec2(8.0f + 16.0f * (19 - 2), 16.0f * 4));
+		m_Ball.SetPosition(glm::vec2(8.0f + 16.0f * 2, 16.0f * 13));
 	}
 	virtual ~GameState() = default;
 
+	
+
 	virtual IData* UpdateData(float deltaTime, IData* data) override
 	{
+		AABBCollision();
+
 		if (!data)
 		{
 			for (auto& pickachu : m_Pickachus)
@@ -50,23 +55,36 @@ public:
 			else
 				m_Pickachus[i].Update(deltaTime, fromClientData->Input);
 
+			m_Ball.Update(deltaTime);
 
 			m_Pickachus[0].SetPosition(glm::clamp(m_Pickachus[0].GetPosition(), { 8.0f + 16.0f * 1, 16.0f * 4.0f }, { 8.0f + 16.0f * 11, 304.0f}));
 			m_Pickachus[1].SetPosition(glm::clamp(m_Pickachus[1].GetPosition(), { 8.0f + 16.0f * 1, 16.0f * 4.0f }, { 8.0f + 16.0f * 11, 304.0f }));
 			m_Pickachus[2].SetPosition(glm::clamp(m_Pickachus[2].GetPosition(), { 8.0f + 16.0f * 15, 16.0f * 4.0f }, { 8.0f + 16.0f * 25, 304.0f }));
 			m_Pickachus[3].SetPosition(glm::clamp(m_Pickachus[3].GetPosition(), { 8.0f + 16.0f * 15, 16.0f * 4.0f }, { 8.0f + 16.0f * 25, 304.0f }));
 
-
-
 			newOutData->ID = data->ID;
 			newOutData->ObjectPositions[i] = { m_Pickachus[i].GetPosition().x, m_Pickachus[i].GetPosition().y };
+			newOutData->AnimationData[i].State = m_Pickachus[i].GetState();
+			newOutData->AnimationData[i].AnimationIndex = m_Pickachus[i].GetAnimationIndex();
+			
+			
 		}
+		
+		newOutData->ObjectPositions[4] = { m_Ball.GetPosition().x, m_Ball.GetPosition().y };
+		newOutData->AnimationData[4].AnimationIndex = m_Ball.GetAnimationIndex();
+		newOutData->AnimationData[4].State = m_Ball.GetState();
+
 		return newOutData;
 	}
 private:
+	void AABBCollision()
+	{
+	}
+
+private:
 	Pickachu m_Pickachus[4]; // Client 1, 2, 3, 4
 	Ball m_Ball;
-	unsigned int m_Scores[2];
+	unsigned int m_Scores[2] = { 0, 0 };
 };
 
 class LobbyState : public State

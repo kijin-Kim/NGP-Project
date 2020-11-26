@@ -18,8 +18,8 @@ public:
 	void SetTag(const std::string& tag) { m_Tag = tag; }
 	const std::string& GetTag() const { return m_Tag; }
 
-	void SetAnimationIndex(unsigned int index) { m_AnimationIndex = index; }
-	unsigned int GetAnimationIndex() const { return m_AnimationIndex; }
+	void SetAnimationIndex(float index) { m_AnimationIndex = index; }
+	float GetAnimationIndex() const { return m_AnimationIndex; }
 
 	unsigned int GetState() const { return m_State; }
 	void SetState(unsigned int state) { m_State = state; }
@@ -30,19 +30,13 @@ private:
 	glm::vec2 m_Position = glm::vec2(0.0f, 0.0f);
 	glm::vec2 m_Velocity = glm::vec2(0.0f, 0.0f);
 	std::string m_Tag = "Default";
-	unsigned int m_AnimationIndex = 0;
+	float m_AnimationIndex = 0.0f;
 	unsigned int m_State = 0;
 };
 
 class Pickachu : public GameObject
 {
 public:
-	enum PickachuState
-	{
-		Idle = 0, Jumping, Walking, Sliding
-	};
-
-
 	Pickachu()
 	{
 		SetTag("Pickachu");
@@ -52,32 +46,74 @@ public:
 
 	void Update(float deltaTime, UserInput input)
 	{
-		unsigned int currentAnimationIndex = GetAnimationIndex();
-		SetAnimationIndex(currentAnimationIndex + 1.0f * deltaTime);
+		
+		if (GetPosition().y <= 16.0f * 4.0f)
+			SetState(Idle);
 
+		switch (GetState())
+		{
+		case Walking:
+		{
+			float currentAnimationIndex = GetAnimationIndex();
+			SetAnimationIndex(currentAnimationIndex + 5.0f * deltaTime);
+			if (GetAnimationIndex() > 5.0f)
+				SetAnimationIndex(0.0f);
+			break;
+		}
+		case Idle:
+		{
+			float currentAnimationIndex = GetAnimationIndex();
+			SetAnimationIndex(currentAnimationIndex + 5.0f * deltaTime);
+			if (GetAnimationIndex() > 5.0f)
+				SetAnimationIndex(0.0f);
+			break;
+		}
+		case Jumping:
+		{
+			float currentAnimationIndex = GetAnimationIndex();
+			SetAnimationIndex(currentAnimationIndex + 30.0f * deltaTime);
+			if (GetAnimationIndex() > 4.0f)
+				SetAnimationIndex(0.0f);
+			break;
+		}
+		default:
+			break;
+		}
 		switch (input.Key)
 		{
 		case GLFW_KEY_LEFT:
 			if (input.Action == GLFW_PRESS || input.Action == GLFW_REPEAT)
 			{
-				SetState(Walking);
+				if (GetState() != Jumping)
+				{
+					SetState(Walking);
+				}
 				SetVelocity({ -150.0f, GetVelocity().y });
 			}
 			if (input.Action == GLFW_RELEASE)
 			{
-				SetState(Idle);
+				if (GetState() != Jumping)
+				{
+					SetState(Idle);
+				}
 				SetVelocity({ 0.0f, GetVelocity().y });
 			}
 			break;
 		case GLFW_KEY_RIGHT:
 			if (input.Action == GLFW_PRESS || input.Action == GLFW_REPEAT)
 			{
-				SetState(Walking);
+				if (GetState() != Jumping)
+				{
+					SetState(Walking);
+				}
 				SetVelocity({ 150.0f, GetVelocity().y });
 			}
 			if (input.Action == GLFW_RELEASE)
 			{
-				SetState(Idle);
+				if (GetState() != Jumping)
+				{
+					SetState(Idle);
+				}
 				SetVelocity({ 0.0f, GetVelocity().y });
 			}
 			break;
@@ -109,14 +145,7 @@ public:
 			break;
 		}
 
-
-
 		SetVelocity({ GetVelocity().x, GetVelocity().y - (GRAVITY * deltaTime) });
-
-
-
-
-
 		SetPosition(GetPosition() + GetVelocity() * deltaTime);
 	}
 private:
@@ -129,11 +158,43 @@ public:
 	Ball()
 	{
 		SetTag("Ball");
+		SetVelocity({ 100.0f, 100.0f });
 	}
 
 	virtual ~Ball() = default;
 
-	void Update(float deltaTime) {}
+	void Update(float deltaTime)
+	{
+		//SetVelocity({ GetVelocity().x, GetVelocity().y - (GRAVITY * deltaTime) });
 
+		float currentAnimationIndex = GetAnimationIndex();
+		SetAnimationIndex(currentAnimationIndex + 2.0f * deltaTime);
+		if (GetAnimationIndex() > 4.0f)
+			SetAnimationIndex(0.0f);
+		
 
+		if (GetPosition().y < 16.0f * 4.0f)
+		{
+			SetPosition({ GetPosition().x, 16.0f * 4.0f });
+			SetVelocity({ GetVelocity().x, -GetVelocity().y });
+		}
+		else if (GetPosition().y > 16.0f * 18.0f)
+		{
+			SetPosition({ GetPosition().x, 16.0f * 18.0f });
+			SetVelocity({ -GetVelocity().x, -GetVelocity().y });
+		}
+
+		if (GetPosition().x < 16.0f * 2.0f  )
+		{
+			SetPosition({ 16.0f * 2.0f, GetPosition().y });
+			SetVelocity({ -GetVelocity().x, GetVelocity().y });
+		}
+		else if (GetPosition().x > 16.0f * 24.0f)
+		{
+			SetPosition({ 16.0f * 24.0f, GetPosition().y });
+			SetVelocity({ -GetVelocity().x, GetVelocity().y });
+		}
+
+		SetPosition(GetPosition() + GetVelocity() * deltaTime);
+	}
 };

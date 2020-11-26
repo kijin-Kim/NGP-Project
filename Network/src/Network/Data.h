@@ -32,10 +32,10 @@ struct float2
 	float Y = 0;
 };
 
-struct Animation : public IData //클라이언트가 렌더링시 필요한 애니메이션 데이터
+struct Animation
 {
-	uint8_t Status;  // 특정 오브젝트의 상태(예) 점프, 슬라이딩, Idle 등)
-	uint8_t SpriteIndex; //특정 상태에서 출력해야되는 2D 스프라이트의 인덱스
+	uint8_t State;  // 특정 오브젝트의 상태(예) 점프, 슬라이딩, Idle 등)
+	uint8_t AnimationIndex; //특정 상태에서 출력해야되는 2D 스프라이트의 인덱스
 };
 
 struct ServerToClientInGame : public IData //Client가 게임을 렌더링할 때 필요한 계산된 데이터
@@ -80,3 +80,11 @@ struct ServerToClientInLogin : public IData //서버가 클라이언트에게 보내는 로그�
 };
 
 #pragma pack(pop)
+
+
+//////////////////////// GLOBAL ENUM
+
+enum PickachuState
+{
+	Idle = 0, Jumping, Walking, Sliding
+};

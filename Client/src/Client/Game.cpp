@@ -81,9 +81,6 @@ void Game::ConnectToServer()
 	network->isServer = false;
 	m_Socket = socket(AF_INET, SOCK_STREAM, 0);
 
-	//int option = TRUE;
-	//setsockopt(m_Socket, IPPROTO_TCP, TCP_NODELAY, (const char*)&option, sizeof(option));
-
 	network->Connect(m_Socket, "127.0.0.1");
 }
 

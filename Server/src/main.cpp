@@ -107,12 +107,10 @@ DWORD ListeningThreadProc(LPVOID)
 	Network* network = Network::GetInstance();
 	SOCKET listeningSocket = socket(AF_INET, SOCK_STREAM, 0);
 
-	/*int option = TRUE;
-	setsockopt(listeningSocket, IPPROTO_TCP, TCP_NODELAY, (const char*)&option, sizeof(option));*/
 
 	network->BindAndListen(listeningSocket);
 
-	while (true)
+	while (clientCount <= 4)
 	{
 		SOCKET clientSocket = network->Accept(listeningSocket);
 		printf("%d 번째 클라이언트 접속!", clientCount);
@@ -129,7 +127,7 @@ DWORD ListeningThreadProc(LPVOID)
 	}
 
 	network->Release(listeningSocket);
-
+	return 0;
 }
 
 DWORD CommunicationThreadProc(LPVOID arg)
