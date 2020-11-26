@@ -9,7 +9,7 @@ extern Game* CreateGameApplication(const std::string& serverIP);
 
 int main(void)
 {
-	auto game = CreateGameApplication();
+	auto game = CreateGameApplication("127.0.0.1");
 	game->Run();
 	delete game;
 }

@@ -50,7 +50,7 @@ int main()
 		QueryPerformanceCounter((LARGE_INTEGER*)&currentCounts);
 		float deltaTime = (currentCounts - lastCounts) * secondsPerCount;
 		lastCounts = currentCounts;
-		while (deltaTime < 0.008f)  // FPS Limit
+		while (deltaTime < 0.016f)  // FPS Limit
 		{
 			QueryPerformanceCounter((LARGE_INTEGER*)&currentCounts);
 			deltaTime += (currentCounts - lastCounts) * secondsPerCount;

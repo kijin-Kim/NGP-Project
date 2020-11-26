@@ -85,20 +85,42 @@ void Game::ConnectToServer()
 
 void Game::Run()
 {
+
+	int64_t countsPerSec;
+	QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
+
+	int64_t currentCounts;
+	QueryPerformanceCounter((LARGE_INTEGER*)&currentCounts);
+
+	double secondsPerCount = 1.0 / (double)countsPerSec;
+	int64_t lastCounts = currentCounts;
 	while (!glfwWindowShouldClose(m_Window))
 	{
-		m_Renderer->Clear();
-		/* Render here */
-		if (m_State)
+
+		QueryPerformanceCounter((LARGE_INTEGER*)&currentCounts);
+		float deltaTime = (currentCounts - lastCounts) * secondsPerCount;
+		lastCounts = currentCounts;
+		while (deltaTime < 0.016f)  // FPS Limit
 		{
-			m_State->SendData();
-			m_State->ReceiveData();
-			m_State->Render();
+			QueryPerformanceCounter((LARGE_INTEGER*)&currentCounts);
+			deltaTime += (currentCounts - lastCounts) * secondsPerCount;
+			lastCounts = currentCounts;
 		}
-		/* Swap front and back buffers */
-		glfwSwapBuffers(m_Window);
-		/* Poll for and process events */
-		glfwPollEvents();
+		{
+
+			m_Renderer->Clear();
+			/* Render here */
+			if (m_State)
+			{
+				m_State->SendData();
+				m_State->ReceiveData();
+				m_State->Render();
+			}
+			/* Swap front and back buffers */
+			glfwSwapBuffers(m_Window);
+			/* Poll for and process events */
+			glfwPollEvents();
+		}
 	}
 }
 
