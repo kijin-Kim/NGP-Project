@@ -24,10 +24,10 @@ public:
 	Renderer* GetRenderer() const { return m_Renderer; }
 
 	unsigned int GetID() const { return m_ID; }
-	unsigned int SetID(unsigned int id) { m_ID = id; }
+	void SetID(unsigned int id) { m_ID = id; }
 
 	State* GetState() const;
-	void SetState(State* state);
+	void SetGameState(State* state);
 
 private:
 	void ConnectToServer();

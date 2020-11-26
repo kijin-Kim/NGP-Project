@@ -1,6 +1,24 @@
 #pragma once
 #include <cstdint>
 
+//////////////////////// GLOBAL ENUM //////////////////////////////
+
+enum LoginResult
+{
+	None = 0, Failed, Succeded
+};
+
+enum PickachuState
+{
+	Pickachu_Idle = 0, Pickachu_Jumping, Pickachu_Walking, Pickachu_PowerHiting
+};
+
+enum BallState
+{
+	Ball_Idle = 4, Ball_PowerHiting
+};
+
+
 #pragma pack(push)
 #pragma pack(1)
 
@@ -72,24 +90,11 @@ struct ServerToClientInLobby : public IData //Client가 로비를 렌더링할 때 필요한
 
 struct ClientToServerInLogin : public IData //클라이언트가 서버에게 보낼 닉네임
 {
-	wchar_t NickName[8];
+	wchar_t NickName[20];
 };
 struct ServerToClientInLogin : public IData //서버가 클라이언트에게 보내는 로그인 성공여부(중복 시, 실패)
 {
-	bool bLoginResult;
+	LoginResult Result = None;
 };
 
 #pragma pack(pop)
-
-
-//////////////////////// GLOBAL ENUM
-
-enum PickachuState
-{
-	Pickachu_Idle = 0, Pickachu_Jumping, Pickachu_Walking, Pickachu_PowerHiting
-};
-
-enum BallState
-{
-	Ball_Idle = 4, Ball_PowerHiting
-};

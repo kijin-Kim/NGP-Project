@@ -77,8 +77,6 @@ public:
 			newOutData->ObjectPositions[i] = { m_Pickachus[i].GetPosition().x, m_Pickachus[i].GetPosition().y };
 			newOutData->AnimationData[i].State = m_Pickachus[i].GetState();
 			newOutData->AnimationData[i].AnimationIndex = m_Pickachus[i].GetAnimationIndex();
-			
-			
 		}
 		
 		newOutData->ObjectPositions[4] = { m_Ball.GetPosition().x, m_Ball.GetPosition().y };
@@ -235,13 +233,31 @@ public:
 
 	virtual IData* UpdateData(float deltaTime, IData* data) override
 	{
-		ClientToServerInLogin* fromClientData = (ClientToServerInLogin*)data;
-		
 		ServerToClientInLogin* newOutData = new ServerToClientInLogin();
-		newOutData->bLoginResult = true;
-		newOutData->ID = data->ID;
+		if (data)
+		{
+			ClientToServerInLogin* fromClientData = (ClientToServerInLogin*)data;
+			newOutData->ID = fromClientData->ID;
+			auto result = std::find(std::begin(m_Names), std::end(m_Names), fromClientData->NickName);
+			if (result == std::end(m_Names) && fromClientData->NickName[0])
+			{
+				newOutData->Result = LoginResult::Succeded;
+				m_Names[m_NameCount++] = std::wstring(fromClientData->NickName);
+			}
+			else if(!fromClientData->NickName[0])
+			{
+				newOutData->Result = LoginResult::None;
+				
+			}
+			else
+			{
+				newOutData->Result = LoginResult::Failed;
+			}
+		}
+		
 
 		return newOutData;
+
 	}
 
 private:

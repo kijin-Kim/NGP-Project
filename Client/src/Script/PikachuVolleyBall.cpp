@@ -3,6 +3,7 @@
 #include "Client/State.h"
 #include "Client/Renderer.h"
 #include "Client/FontData.h"
+#include <GLFW/glfw3.h>
 
 
 class GameState : public State
@@ -322,23 +323,76 @@ public:
 
 		}
 
+		m_ChatBoard.bUseColor = true;
+		m_ChatBoard.bUseTexture = false;
+		m_ChatBoard.Position = glm::vec2(432 / 2.0f, 304 / 2.0f + 20.0f);
+		m_ChatBoard.Color = glm::vec4(0.3f, 0.3f, 0.3f, 0.8f);
+		m_ChatBoard.Size = glm::vec2(200, 50);
+
+		m_LoginBoard.bUseColor = true;
+		m_LoginBoard.bUseTexture = false;
+		m_LoginBoard.Position = glm::vec2(432 / 2.0f, 304 / 2.0f + 20.0f);
+		m_LoginBoard.Color = glm::vec4(1.0f, 1.0f, 1.0f, 0.8f);
+		m_LoginBoard.Size = glm::vec2(180, 30);
+
+		m_FontData = new FontData("assets/fonts/vt323/VT323-Regular.ttf", 20);
+
+
 	}
 	virtual ~LoginState() = default;
 
 	virtual void SendData() override
 	{
-		ServerToClientInLogin data = {};
+		ClientToServerInLogin data = {};
+
+		auto& charQueue = m_Game->GetCharQueue();
+		if (charQueue.empty())
+		{
+			// Send Empty Input
+		}
+		else
+		{
+			if(m_String.size() < 18)
+				m_String += charQueue.front();
+			// Send User Input
+			charQueue.pop();
+		}
+		UserInput input = {};
+		auto& inputQueue = m_Game->GetInputQueue();
+		input.Key = -1;
+		if (!inputQueue.empty())
+		{
+			input = inputQueue.front();
+			inputQueue.pop();
+		}
+
+		if (input.Action == GLFW_PRESS && input.Key == GLFW_KEY_ENTER)
+		{
+			wcscpy(data.NickName, m_String.c_str());
+			m_String.clear();
+		}
+		else if ((input.Action == GLFW_PRESS || input.Action == GLFW_REPEAT) 
+			&& input.Key == GLFW_KEY_BACKSPACE
+			&& !m_String.empty())
+		{
+			m_String.pop_back();
+		}
+		else
+		{
+			wcscpy(data.NickName, L"");
+		}
+		data.ID = m_Game->GetID();
 		Network::GetInstance()->Send(m_Game->GetSocket(), (char*)&data, sizeof(data));
 	}
 	virtual void ReceiveData() override
 	{
 		ServerToClientInLogin data = {};
 		Network::GetInstance()->Recv(m_Game->GetSocket(), (char*)&data, sizeof(data));
-		if (data.bLoginResult)
-		{
-			m_Game->SetID(data.ID);
-			m_Game->SetState(new GameState(m_Game));
-		}	
+		m_Game->SetID(data.ID);
+
+		if(m_bResult != LoginResult::Failed)
+			m_bResult = data.Result;
+		
 	}
 
 	virtual void Render() override
@@ -346,11 +400,95 @@ public:
 		Renderer* renderer = m_Game->GetRenderer();
 		for (int i = 0; i < _countof(m_BackGroundTiles); i++)
 			renderer->DrawQuad(m_BackGroundTiles[i]);
+
+		renderer->DrawQuad(m_ChatBoard);
+		renderer->DrawQuad(m_LoginBoard);
+
+		Renderer::Quad ftQuad;
+
+		int advance = 0;
+		for (int i = 0; i < m_String.size(); i++)
+		{
+			Font ft = m_FontData->GetFont(m_String[i]);
+			ftQuad.bUseTexture = false;
+			ftQuad.bUseFont = true;
+			ftQuad.Position = glm::vec2(432 / 2.0f - 100.0f + 20.0f + advance, 304 / 2.0f + 15.0f);
+			ftQuad.Font = ft;
+			ftQuad.bUseColor = true;
+			ftQuad.Color = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+			advance += ftQuad.Font.Advance;
+
+			renderer->DrawQuad(ftQuad);
+		}
+
+		static bool bCarretBlink = false;
+		static float carretBlinkTimer = 0.0f;
+		carretBlinkTimer += 0.016f * 2;
+		if (carretBlinkTimer >= 1.0f)
+		{
+			carretBlinkTimer = 0.0f;
+			bCarretBlink = !bCarretBlink;
+		}
+
+
+		Font ft = m_FontData->GetFont('|');
+		ftQuad.bUseTexture = false;
+		ftQuad.bUseFont = true;
+		ftQuad.Position = glm::vec2(432 / 2.0f - 100.0f + 20.0f + advance + 1.0f, 304 / 2.0f + 15.0f);
+		ftQuad.Font = ft;
+		ftQuad.bUseColor = true;
+		
+		ftQuad.Color = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+		if (bCarretBlink)
+			ftQuad.Color.a = 0.0f;
+		else
+			ftQuad.Color.a = 1.0f;
+
+		renderer->DrawQuad(ftQuad);
+
+
+		if (m_bResult == LoginResult::Failed)
+		{
+			Renderer::Quad resultQuad = {};
+			resultQuad.bUseColor = true;
+			resultQuad.bUseTexture = false;
+			resultQuad.Position = glm::vec2(432 / 2.0f, 304 / 2.0f + 20.0f - 50.0f);
+			resultQuad.Color = glm::vec4(1.0f, 1.0f, 1.0f, 0.8f);
+			resultQuad.Size = glm::vec2(220, 30);
+			renderer->DrawQuad(resultQuad);
+
+
+			std::string resultString = "NickName Is Already Taken";
+			advance = 0;
+			for (int i = 0; i < resultString.size(); i++)
+			{
+				Font ft = m_FontData->GetFont(resultString[i]);
+				ftQuad.bUseTexture = false;
+				ftQuad.bUseFont = true;
+				ftQuad.Position = glm::vec2(432 / 2.0f - 100.0f + advance, 304 / 2.0f + 15.0f - 50.0f);
+				ftQuad.Font = ft;
+				ftQuad.bUseColor = true;
+				ftQuad.Color = glm::vec4(0.9f, 0.1f, 0.1f, 0.8f);
+				advance += ftQuad.Font.Advance;
+
+				renderer->DrawQuad(ftQuad);
+			}
+		}
+		else if (m_bResult == LoginResult::Succeded)
+		{
+			m_Game->SetGameState(new GameState(m_Game));
+		}
 	}
 
 private:
 	Renderer::Quad m_BackGroundTiles[20];
+	Renderer::Quad m_ChatBoard;
+	Renderer::Quad m_LoginBoard;
 	ServerToClientInLogin m_Data = {};
+	FontData* m_FontData = nullptr;
+	std::wstring m_String;
+
+	LoginResult m_bResult;
 };
 
 
@@ -363,9 +501,9 @@ public:
 		TextureManager* textureManager = TextureManager::GetInstance();
 		textureManager->LoadTextureAtlas("assets/textures/sprite_sheet.json", "assets/textures/sprite_sheet.png");
 
-		SetState(new GameState(this));
-		//SetState(new LobbyState(this));
-		//SetState(new LoginState(this));
+		//SetGameState(new GameState(this));
+		//SetGameState(new LobbyState(this));
+		SetGameState(new LoginState(this));
 	}
 	virtual ~PickachuVolleyBall() = default;
 

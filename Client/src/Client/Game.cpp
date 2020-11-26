@@ -129,7 +129,7 @@ State* Game::GetState() const
 	return m_State;
 }
 
-void Game::SetState(State* state)
+void Game::SetGameState(State* state)
 {
 	m_State = state;
 }
