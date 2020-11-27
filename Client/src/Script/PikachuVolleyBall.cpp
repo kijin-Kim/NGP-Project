@@ -99,6 +99,8 @@ public:
 		m_ScoreQuads[3].Position = glm::vec2(8.0f + 16.0f * (7 + 13 + 2), 16.0f * 17);
 		m_ScoreQuads[3].Image = m_Numbers[0];
 
+
+		m_FontData = new FontData("assets/fonts/vt323/VT323-Regular.ttf", 40);
 	} 
 
 	virtual ~GameState() = default;
@@ -109,12 +111,15 @@ public:
 		UserInput input = {};
 		auto& inputQueue = m_Game->GetInputQueue();
 		input.Key = -1;
-		if (!inputQueue.empty())
-		{
-			input = inputQueue.front();
-			inputQueue.pop();
-		}
 
+		if (!m_bGameIsDone) // 게임이 끝나면 조작 불가능
+		{
+			if (!inputQueue.empty())
+			{
+				input = inputQueue.front();
+				inputQueue.pop();
+			}
+		}
 		ClientToServerInGame data = {};
 		data.ID = 0;
 		data.Input = input;
@@ -131,7 +136,7 @@ public:
 			m_ObjectsQuad[i].Position.x = data.ObjectPositions[i].X;
 			m_ObjectsQuad[i].Position.y = data.ObjectPositions[i].Y;
 			
-			// PICKACHUS SPECIFICE
+			// PICKACHUS SPECIFIC
 			if (i != 4)
 			{
 				switch (data.AnimationData[i].State)
@@ -170,15 +175,59 @@ public:
 				}
 				
 			}
-	
+			
 		}
 
 		for (int i = 0; i < _countof(data.Scores); i++)
 		{
-			if (data.Scores[i] > 15)
+			if (data.Scores[i] > MAX_GAME_SCORE)
+			{
 				break;
+			}
+			if (data.Scores[i] == MAX_GAME_SCORE)
+			{
+				m_bGameIsDone = true;
+			}
 			m_ScoreQuads[0 + i * 2].Image = m_Numbers[data.Scores[i] / 10];
 			m_ScoreQuads[1 + i * 2].Image = m_Numbers[data.Scores[i] % 10];
+		}
+
+
+		if (m_bGameIsDone && m_ResultString.empty())
+		{
+			switch (m_Game->GetID())
+			{
+			case 0:
+			case 1:
+				if (data.bLeftTeamWon)
+				{
+					m_ResultString = "WIN";
+					m_ResultBoxColor = glm::vec4(129.0f / 255.0f, 193.0f / 255.0f, 71.0f / 255.0f, 1.0f);
+				}
+				else
+				{
+					m_ResultString = "LOSE";
+					m_ResultBoxColor = glm::vec4(255.0f / 255.0f, 40.0f / 255.0f, 0.0f, 1.0f);
+				}
+				break;
+			case 2:
+			case 3:
+				if (data.bLeftTeamWon)
+				{
+					m_ResultString = "LOSE";
+					m_ResultBoxColor = glm::vec4(255.0f / 255.0f, 40.0f / 255.0f, 0.0f, 1.0f);
+				}
+				else
+				{
+					m_ResultString = "WIN";
+					m_ResultBoxColor = glm::vec4(129.0f / 255.0f, 193.0f / 255.0f, 71.0f / 255.0f, 1.0f);
+				}
+				break;
+
+				break;
+			default:
+				break;
+			}
 		}
 	}
 
@@ -191,6 +240,34 @@ public:
 			renderer->DrawQuad(quad);
 		for(auto & quad : m_ScoreQuads)
 			renderer->DrawQuad(quad);
+
+		if (m_bGameIsDone)
+		{
+			Renderer::Quad gameResultQuad;
+			gameResultQuad.bUseColor = true;
+			gameResultQuad.bUseTexture = false;
+			gameResultQuad.Position = glm::vec2(432 / 2.0f, 304.0f / 2.0f + 20.0f);
+			gameResultQuad.Color = m_ResultBoxColor;
+			gameResultQuad.Size = glm::vec2(432.0 / 2.0f, 304.0f/ 4.0f);
+			renderer->DrawQuad(gameResultQuad);
+
+
+			int advance = 0;
+			Renderer::Quad ftQuad = {};
+			for (int i = 0; i < m_ResultString.size(); i++)
+			{
+				Font ft = m_FontData->GetFont(m_ResultString[i]);
+				ftQuad.bUseTexture = false;
+				ftQuad.bUseFont = true;
+				ftQuad.Position = glm::vec2(432 / 2.0f - 25.0f + advance, 304.0f / 2.0f + 10.0f );
+				ftQuad.Font = ft;
+				ftQuad.bUseColor = true;
+				ftQuad.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+				advance += ftQuad.Font.Advance;
+
+				renderer->DrawQuad(ftQuad);
+			}
+		}
 	}
 
 private:
@@ -207,9 +284,14 @@ private:
 	Texture m_BallPowerHiting[2];
 
 	Texture m_BallIdle[5];
-	
 
 	ServerToClientInGame m_Data = {};
+
+	bool m_bGameIsDone = false;
+	std::string m_ResultString;
+	glm::vec4 m_ResultBoxColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	FontData* m_FontData = nullptr;
 };
 
 class LobbyState : public State
@@ -582,9 +664,9 @@ public:
 		TextureManager* textureManager = TextureManager::GetInstance();
 		textureManager->LoadTextureAtlas("assets/textures/sprite_sheet.json", "assets/textures/sprite_sheet.png");
 
-		//SetGameState(new GameState(this));
+		SetGameState(new GameState(this));
 		//SetGameState(new LobbyState(this));
-		SetGameState(new LoginState(this));
+		//SetGameState(new LoginState(this));
 	}
 	virtual ~PickachuVolleyBall() = default;
 

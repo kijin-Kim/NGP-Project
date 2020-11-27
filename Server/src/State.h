@@ -4,7 +4,7 @@
 
 enum class ClientState
 {
-	Login, Lobby, Game
+	Login, Lobby, Game, AfterGame
 };
 
 class State
@@ -37,10 +37,10 @@ public:
 			p.SetState(PickachuState::Pickachu_Idle);
 			p.SetVelocity({ 0.0f, 0.0f });
 		}
-		m_Pickachus[0].SetPosition(glm::vec2(8.0f + 16.0f * 2, 16.0f * 4));
+		m_Pickachus[0].SetPosition(glm::vec2(8.0f + 16.0f * 1, 16.0f * 4));
 		m_Pickachus[1].SetPosition(glm::vec2(8.0f + 16.0f * (2 + 4), 16.0f * 4));
-		m_Pickachus[2].SetPosition(glm::vec2(8.0f + 16.0f * (19 - 2 + 4), 16.0f * 4));
-		m_Pickachus[3].SetPosition(glm::vec2(8.0f + 16.0f * (19 - 2), 16.0f * 4));
+		m_Pickachus[2].SetPosition(glm::vec2(8.0f + 16.0f * 20, 16.0f * 4));
+		m_Pickachus[3].SetPosition(glm::vec2(8.0f + 16.0f * 25, 16.0f * 4));
 
 		m_Ball.SetPosition(glm::vec2(8.0f + 16.0f * 2, 16.0f * 13));
 		m_Ball.SetAnimationIndex(0);
@@ -75,23 +75,37 @@ public:
 
 			m_Ball.Update(deltaTime);
 
-			if (m_Ball.GetPosition().y <= 16.0f * 4.0f)
+			if (m_Ball.GetPosition().y < 16.0f * 4.0f)
 			{
 				m_Ball.SetPosition({ m_Ball.GetPosition().x, 16.0f * 4.0f });
 				m_Ball.SetVelocity({ m_Ball.GetVelocity().x, -m_Ball.GetVelocity().y });
 
-				if (m_Ball.GetPosition().x < 190)
+
+				if (m_Scores[0] <= MAX_GAME_SCORE && m_Scores[1] <= MAX_GAME_SCORE)
 				{
-					m_Scores[1]++;
-					Reset();
-					m_Ball.SetPosition({ 8.0f + 16.0f * 25, 304.0f });
+					if (m_Ball.GetPosition().x < 190)
+					{
+						m_Scores[1]++;
+						Reset();
+						m_Ball.SetPosition({ 8.0f + 16.0f * 22, 304.0f });
+					}
+					else if (m_Ball.GetPosition().x > 240)
+					{
+						m_Scores[0]++;
+						Reset();
+						m_Ball.SetPosition({ 8.0f + 16.0f * 3, 304.0f });
+					}
+
+					if (m_Scores[0] == MAX_GAME_SCORE)
+					{
+						newOutData->bLeftTeamWon = true;
+					}
+					else if (m_Scores[1] == MAX_GAME_SCORE)
+					{
+						newOutData->bLeftTeamWon = false;
+					}
 				}
-				else if (m_Ball.GetPosition().x > 240)
-				{
-					m_Scores[0]++;
-					Reset();
-					m_Ball.SetPosition({ 8.0f + 16.0f * 1, 304.0f });
-				}
+				
 			}
 
 			m_Pickachus[0].SetPosition(glm::clamp(m_Pickachus[0].GetPosition(), { 8.0f + 16.0f * 1, 16.0f * 4.0f }, { 8.0f + 16.0f * 11, 304.0f}));

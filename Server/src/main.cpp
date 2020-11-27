@@ -10,8 +10,8 @@ DWORD CommunicationThreadProc(LPVOID arg);
 
 std::queue<IData*> g_DataQueue;
 IData* g_ProcessedData[MAX_USER];
-//ClientState g_ClientStates[MAX_USER] = { ClientState::Game, ClientState::Game, ClientState::Game, ClientState::Game, }; //TEMP
-ClientState g_ClientStates[MAX_USER] = { ClientState::Login, ClientState::Login, ClientState::Login, ClientState::Login, }; //TEMP
+ClientState g_ClientStates[MAX_USER] = { ClientState::Game, ClientState::Game, ClientState::Game, ClientState::Game, }; //TEMP
+//ClientState g_ClientStates[MAX_USER] = { ClientState::Login, ClientState::Login, ClientState::Login, ClientState::Login, }; //TEMP
 //ClientState g_ClientStates[MAX_USER] = { ClientState::Lobby, ClientState::Lobby, ClientState::Lobby, ClientState::Lobby, }; //TEMP
 HANDLE g_ClientEvents[MAX_USER];
 int g_ClientCount = 0;

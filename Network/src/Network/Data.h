@@ -1,7 +1,9 @@
 #pragma once
 #include <cstdint>
 
-//////////////////////// GLOBAL ENUM //////////////////////////////
+//////////////////////// GLOBAL ENUM, DEFINES //////////////////////////////
+
+#define MAX_GAME_SCORE 5
 
 enum LoginResult
 {
@@ -61,6 +63,7 @@ struct ServerToClientInGame : public IData //Client가 게임을 렌더링할 때 필요한 
 	float2 ObjectPositions[5]; //게임내의 모든 오브젝트의 위치(플레이어 4명, 공 1개)
 	uint8_t Scores[2];     //게임내의 팀의 점수(순서대로 좌측 팀, 우측 팀)
 	Animation AnimationData[5];  //애니메이션 데이터
+	bool bLeftTeamWon = false; // 게임이 끝났을 때 (어느 한 쪽팀이 목표점수에 도달하였을 때), 확인하는 Boolean, True 왼쪽팀 승리 False 오른쪽팀 승리
 };
 
 
@@ -101,5 +104,6 @@ struct ServerToClientInLogin : public IData //서버가 클라이언트에게 보내는 로그�
 {
 	LoginResult Result = None;
 };
+
 
 #pragma pack(pop)
