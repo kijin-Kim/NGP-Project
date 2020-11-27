@@ -202,11 +202,7 @@ private:
 				}
 			}
 			
-		}
-
-
-		// BALL VS NET
-		
+		}		
 
 	}
 
@@ -221,8 +217,38 @@ class LobbyState : public State
 public:
 	LobbyState() = default;
 	virtual ~LobbyState() = default;
-	virtual IData* UpdateData(float deltaTime, IData* data) override { return nullptr; }
-	
+	virtual IData* UpdateData(float deltaTime, IData* data) override
+	{
+		ServerToClientInLobby* newOutData = new ServerToClientInLobby();
+		if (data)
+		{
+			ClientToServerInLobby* fromClientData = (ClientToServerInLobby*)data;
+			if (fromClientData->Chat[0] != 0)
+			{
+				wchar_t buffer[200];
+				wsprintfW(buffer, L"[Client %d ]: %s", data->ID, fromClientData->Chat);
+
+				wcscpy(m_Chats[m_ChatIndex].Line, buffer);
+				if (wcslen(buffer) >= 45)
+					m_ChatIndex++;
+				m_ChatIndex++;
+
+			}
+			newOutData->ID = data->ID;
+			newOutData->bShouldStartMatch = false;
+			memcpy(newOutData->Chats, m_Chats, sizeof(m_Chats));
+			if (m_ChatIndex >= 16)
+			{
+				m_ChatIndex = 0;
+				ZeroMemory(m_Chats, sizeof(m_Chats));
+			}
+		}
+		return newOutData;
+	}
+
+private:
+	ChatLine m_Chats[16];
+	unsigned int m_ChatIndex = 0;
 };
 
 class LoginState : public State
@@ -239,18 +265,18 @@ public:
 			ClientToServerInLogin* fromClientData = (ClientToServerInLogin*)data;
 			newOutData->ID = fromClientData->ID;
 			auto result = std::find(std::begin(m_Names), std::end(m_Names), fromClientData->NickName);
-			if (result == std::end(m_Names) && fromClientData->NickName[0])
-			{
-				newOutData->Result = LoginResult::Succeded;
-				m_Names[m_NameCount++] = std::wstring(fromClientData->NickName);
-			}
-			else if(!fromClientData->NickName[0])
+			if (fromClientData->NickName[0] == 0)
 			{
 				newOutData->Result = LoginResult::None;
-				
+			}
+			else if (result == std::end(m_Names) && m_NameCount < 4)
+			{
+				newOutData->Result = LoginResult::Succeded;
+				m_Names[m_NameCount++] = fromClientData->NickName;
 			}
 			else
 			{
+				printf("FAILED!");
 				newOutData->Result = LoginResult::Failed;
 			}
 		}

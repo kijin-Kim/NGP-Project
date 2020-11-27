@@ -72,13 +72,18 @@ struct ServerToClientInGame : public IData //Client가 게임을 렌더링할 때 필요한 
 
 struct ClientToServerInLobby : public IData  //서버가 로비에서 Client에게 넘겨줄(Client가 렌더링할때 필요한) 데이터를 계산하기 위해 필요한 데이터
 {
-	wchar_t Chat[256];
+	wchar_t Chat[256] = {};
+};
+
+struct ChatLine
+{
+	wchar_t Line[50] = {};
 };
 
 struct ServerToClientInLobby : public IData //Client가 로비를 렌더링할 때 필요한 계산된 데이터
 {
-	wchar_t Chats[2048];
-	bool bShouldStartMatch;
+	ChatLine Chats[16] = {};
+	bool bShouldStartMatch = false;
 };
 
 
@@ -90,7 +95,7 @@ struct ServerToClientInLobby : public IData //Client가 로비를 렌더링할 때 필요한
 
 struct ClientToServerInLogin : public IData //클라이언트가 서버에게 보낼 닉네임
 {
-	wchar_t NickName[20];
+	wchar_t NickName[20] = {};
 };
 struct ServerToClientInLogin : public IData //서버가 클라이언트에게 보내는 로그인 성공여부(중복 시, 실패)
 {

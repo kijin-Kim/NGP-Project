@@ -245,6 +245,8 @@ public:
 
 	virtual void SendData() override
 	{
+		ClientToServerInLobby data = {};
+
 		auto& charQueue = m_Game->GetCharQueue();
 		if (charQueue.empty())
 		{
@@ -252,16 +254,49 @@ public:
 		}
 		else
 		{
-			wchar_t character = charQueue.front();
+			if(m_String.size() < 45)
+				m_String += charQueue.front();
 			// Send User Input
 			charQueue.pop();
 		}
+		UserInput input = {};
+		auto& inputQueue = m_Game->GetInputQueue();
+		input.Key = -1;
+		if (!inputQueue.empty())
+		{
+			input = inputQueue.front();
+			inputQueue.pop();
+		}
+
+		if (input.Action == GLFW_PRESS && input.Key == GLFW_KEY_ENTER)
+		{
+			wcscpy(data.Chat, m_String.c_str());
+			m_String.clear();
+		}
+		else if ((input.Action == GLFW_PRESS || input.Action == GLFW_REPEAT)
+			&& input.Key == GLFW_KEY_BACKSPACE
+			&& !m_String.empty())
+		{
+			m_String.pop_back();
+		}
+		else
+		{
+			wcscpy(data.Chat, L"");
+		}
+		data.ID = m_Game->GetID();
+		Network::GetInstance()->Send(m_Game->GetSocket(), (char*)&data, sizeof(data));
 
 	}
 	virtual void ReceiveData() override
 	{
-	}
+		ServerToClientInLobby data = {};
+		Network::GetInstance()->Recv(m_Game->GetSocket(), (char*)&data, sizeof(data));
+		memcpy(m_Chats, data.Chats, sizeof(data.Chats));
+		m_Game->SetID(data.ID);
 
+		if (data.bShouldStartMatch)
+			m_Game->SetGameState(new GameState(m_Game));
+	}
 
 	virtual void Render() override
 	{
@@ -274,27 +309,69 @@ public:
 		Renderer::Quad ftQuad;
 	
 		int advance = 0;
-		int lineCount = 0;
+		for (int i = 0; i < _countof(m_Chats); i++)
+		{
+			advance = 0;
+			for (int j = 0; j < _countof(m_Chats[i].Line); j++)
+			{
+				Font ft = m_FontData->GetFont(m_Chats[i].Line[j]);
+				ftQuad.bUseTexture = false;
+				ftQuad.bUseFont = true;
+				ftQuad.Position = glm::vec2(20.0f + advance, 304.0f - 30.0f - i * 15.0f);
+				ftQuad.Font = ft;
+				ftQuad.bUseColor = true;
+				ftQuad.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+				advance += ftQuad.Font.Advance;
+				renderer->DrawQuad(ftQuad);
+			}
+		}
+
+		Renderer::Quad chatRegionQuad;
+		chatRegionQuad.bUseColor = true;
+		chatRegionQuad.bUseTexture = false;
+		chatRegionQuad.Position = glm::vec2(432 / 2.0f, 8.0f + 16.0f * 1.0f + 2.0f);
+		chatRegionQuad.Color = glm::vec4(0.2f, 0.5f, 0.2f, 0.8f);
+		chatRegionQuad.Size = glm::vec2(432 - 20 - 20, (304 - 20) / 15.0f);
+		renderer->DrawQuad(chatRegionQuad);
+
+		advance = 0;
 		for (int i = 0; i < m_String.size(); i++)
 		{
 			Font ft = m_FontData->GetFont(m_String[i]);
 			ftQuad.bUseTexture = false;
 			ftQuad.bUseFont = true;
-			ftQuad.Position = glm::vec2(20.0f + advance, 304.0f - 30.0f - lineCount * 15.0f);
+			ftQuad.Position = glm::vec2(20.0f + advance, 16.0f * 1.0f + 3.0f);
 			ftQuad.Font = ft;
 			ftQuad.bUseColor = true;
 			ftQuad.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 			advance += ftQuad.Font.Advance;
 
-			if (20.0f + advance >= 432.0f - 20.0f)
-			{
-				lineCount++;
-				advance = 0.0f;
-			}
-
 			renderer->DrawQuad(ftQuad);
 		}
 
+		static bool bCarretBlink = false;
+		static float carretBlinkTimer = 0.0f;
+		carretBlinkTimer += 0.016f * 2;
+		if (carretBlinkTimer >= 1.0f)
+		{
+			carretBlinkTimer = 0.0f;
+			bCarretBlink = !bCarretBlink;
+		}
+
+		Font ft = m_FontData->GetFont('|');
+		ftQuad.bUseTexture = false;
+		ftQuad.bUseFont = true;
+		ftQuad.Position = glm::vec2(20.0f + advance + 1.0f, 16.0f * 1.0f + 3.0f);
+		ftQuad.Font = ft;
+		ftQuad.bUseColor = true;
+
+		ftQuad.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		if (bCarretBlink)
+			ftQuad.Color.a = 0.0f;
+		else
+			ftQuad.Color.a = 1.0f;
+
+		renderer->DrawQuad(ftQuad);
 	}
 
 private:
@@ -302,7 +379,8 @@ private:
 	Renderer::Quad m_ChatBoard;
 	FontData* m_FontData;
 	ServerToClientInLobby m_Data = {};
-	std::string m_String = "PBR, or more commonly known as physically based rendering, is a collection of render techniques that are more or less based on the same underlying theory that more closely matches that of the physical world. As physically based rendering aims to mimic light in a physically plausible way, it generally looks more realistic compared to our original lighting algorithms like Phong and Blinn-Phong. Not only does it look better, as it closely approximates actual physics, we (and especially the artists) can author surface materials based on physical parameters without having to resort to cheap hacks and tweaks to make the lighting look right. One of the bigger advantages of authoring materials based on physical parameters is that these materials will look correct regardless of lighting conditions; something that is not true in non-PBR pipelines.";
+	std::wstring m_String;
+	ChatLine m_Chats[16] = {};
 };
 
 class LoginState : public State
@@ -390,9 +468,14 @@ public:
 		Network::GetInstance()->Recv(m_Game->GetSocket(), (char*)&data, sizeof(data));
 		m_Game->SetID(data.ID);
 
-		if(m_bResult != LoginResult::Failed)
-			m_bResult = data.Result;
-		
+		m_bResult = data.Result;	
+		if (m_bResult == LoginResult::Failed)
+			m_bShouldShowFailedMessage = true;
+
+		if (m_bResult == LoginResult::Succeded)
+		{
+			m_Game->SetGameState(new LobbyState(m_Game));
+		}
 	}
 
 	virtual void Render() override
@@ -447,7 +530,7 @@ public:
 		renderer->DrawQuad(ftQuad);
 
 
-		if (m_bResult == LoginResult::Failed)
+		if (m_bShouldShowFailedMessage)
 		{
 			Renderer::Quad resultQuad = {};
 			resultQuad.bUseColor = true;
@@ -474,10 +557,7 @@ public:
 				renderer->DrawQuad(ftQuad);
 			}
 		}
-		else if (m_bResult == LoginResult::Succeded)
-		{
-			m_Game->SetGameState(new GameState(m_Game));
-		}
+
 	}
 
 private:
@@ -489,6 +569,7 @@ private:
 	std::wstring m_String;
 
 	LoginResult m_bResult;
+	bool m_bShouldShowFailedMessage = false;
 };
 
 
