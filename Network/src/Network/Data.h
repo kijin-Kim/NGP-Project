@@ -12,7 +12,7 @@ enum LoginResult
 
 enum PickachuState
 {
-	Pickachu_Idle = 0, Pickachu_Jumping, Pickachu_Walking, Pickachu_PowerHiting
+	Pickachu_Idle = 0, Pickachu_Jumping, Pickachu_Walking, Pickachu_PowerHiting, Pickachu_Win, Pickachu_Lose
 };
 
 enum BallState

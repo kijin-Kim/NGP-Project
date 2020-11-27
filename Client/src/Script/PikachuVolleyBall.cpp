@@ -35,6 +35,21 @@ public:
 		m_PickachuPowerHiting[0] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_2_0.png");
 		m_PickachuPowerHiting[1] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_2_1.png");
 
+		m_PickachuWin[0] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_5_0.png");
+		m_PickachuWin[1] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_5_1.png");
+		m_PickachuWin[2] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_5_2.png");
+		m_PickachuWin[3] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_5_3.png");
+		m_PickachuWin[4] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_5_4.png");
+
+		m_PickachuLose[0] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_6_0.png");
+		m_PickachuLose[1] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_6_1.png");
+		m_PickachuLose[2] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_6_2.png");
+		m_PickachuLose[3] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_6_3.png");
+		m_PickachuLose[4] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_6_4.png");
+
+
+
+
 		m_BallIdle[0] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_0.png");
 		m_BallIdle[1] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_1.png");
 		m_BallIdle[2] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_2.png");
@@ -150,6 +165,12 @@ public:
 					break;
 				case PickachuState::Pickachu_PowerHiting:
 					m_ObjectsQuad[i].Image = m_PickachuPowerHiting[data.AnimationData[i].AnimationIndex];
+					break;
+				case PickachuState::Pickachu_Win:
+					m_ObjectsQuad[i].Image = m_PickachuWin[data.AnimationData[i].AnimationIndex];
+					break;
+				case PickachuState::Pickachu_Lose:
+					m_ObjectsQuad[i].Image = m_PickachuLose[data.AnimationData[i].AnimationIndex];
 					break;
 				default:
 					break;
@@ -282,6 +303,8 @@ private:
 	Texture m_PickachuJumping[5];
 	Texture m_PickachuPowerHiting[2];
 	Texture m_BallPowerHiting[2];
+	Texture m_PickachuWin[5];
+	Texture m_PickachuLose[5];
 
 	Texture m_BallIdle[5];
 

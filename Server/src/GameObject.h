@@ -122,6 +122,22 @@ public:
 			}
 			break;
 		}
+		case PickachuState::Pickachu_Win:
+		case PickachuState::Pickachu_Lose:
+		{
+			static bool bIsAlreadyShown = false;
+			if (!bIsAlreadyShown)
+			{
+				powerHitCoolTimer += deltaTime;
+				float currentAnimationIndex = GetAnimationIndex();
+				SetAnimationIndex(currentAnimationIndex + 30.0f * deltaTime);
+				if (GetAnimationIndex() > 4.0f)
+				{
+					bIsAlreadyShown = true;
+				}
+			}
+			break;
+		}
 			
 		default:
 			break;
