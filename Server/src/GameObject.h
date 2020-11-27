@@ -65,7 +65,7 @@ public:
 	Pickachu()
 	{
 		SetTag("Pickachu");
-		SetSize({ 16.0f, 32.0f});
+		SetSize({ 48.0f, 56.0f});
 	}
 
 	virtual ~Pickachu() = default;
@@ -131,7 +131,7 @@ public:
 				powerHitCoolTimer += deltaTime;
 				float currentAnimationIndex = GetAnimationIndex();
 				SetAnimationIndex(currentAnimationIndex + 30.0f * deltaTime);
-				if (GetAnimationIndex() > 4.0f)
+				if (GetAnimationIndex() >= 4.0f)
 				{
 					bIsAlreadyShown = true;
 				}
@@ -258,7 +258,6 @@ public:
 				SetAnimationIndex(0.0f);
 			break;
 		}
-			
 		default:
 			break;
 		}

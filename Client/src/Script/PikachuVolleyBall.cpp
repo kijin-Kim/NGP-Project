@@ -16,8 +16,6 @@ public:
 		Texture background = textureManager->GetTexture("assets/textures/Map.png");
 
 		// TEMP
-		Texture pickchu = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_0_0.png");
-		Texture ball = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_0.png");
 
 
 		m_PickachuWalking[0] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_0_0.png");
@@ -48,8 +46,6 @@ public:
 		m_PickachuLose[4] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_6_4.png");
 
 
-
-
 		m_BallIdle[0] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_0.png");
 		m_BallIdle[1] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_1.png");
 		m_BallIdle[2] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "ball/ball_2.png");
@@ -76,31 +72,31 @@ public:
 		m_MapQuad.Image = background;
 		
 		m_ObjectsQuad[0].Position = glm::vec2(8.0f + 16.0f * 2, 16.0f * 4);
-		m_ObjectsQuad[0].Image = pickchu;
+		m_ObjectsQuad[0].Image = m_PickachuWalking[0];
 		m_ObjectsQuad[0].bUseColor = true;
 		m_ObjectsQuad[0].Color = glm::vec4(0.7f, 0.7f, 0.0f, 1.0f);
 
 		m_ObjectsQuad[1].Position = glm::vec2(8.0f + 16.0f * (2 + 4), 16.0f * 4);
-		m_ObjectsQuad[1].Image = pickchu;
+		m_ObjectsQuad[1].Image = m_PickachuWalking[0];
 		m_ObjectsQuad[1].bUseColor = true;
 		m_ObjectsQuad[1].Color = glm::vec4(0.7f, 0.7f, 0.0f, 1.0f);
 
 
 		m_ObjectsQuad[2].Position = glm::vec2(8.0f + 16.0f * (19 - 2 + 4), 16.0f * 4);
-		m_ObjectsQuad[2].Image = pickchu;
+		m_ObjectsQuad[2].Image = m_PickachuWalking[0];
 		m_ObjectsQuad[2].bShouldFlipVertical = true;
 		m_ObjectsQuad[2].bUseColor = true;
 		m_ObjectsQuad[2].Color = glm::vec4(0.7f, 0.7f, 0.0f, 1.0f);
 
 		m_ObjectsQuad[3].Position = glm::vec2(8.0f + 16.0f * (19 - 2), 16.0f * 4);
-		m_ObjectsQuad[3].Image = pickchu;
+		m_ObjectsQuad[3].Image = m_PickachuWalking[0];
 		m_ObjectsQuad[3].bShouldFlipVertical = true;
 		m_ObjectsQuad[3].bUseColor = true;
 		m_ObjectsQuad[3].Color = glm::vec4(0.7f, 0.7f, 0.0f, 1.0f);
 
 
 		m_ObjectsQuad[4].Position = glm::vec2(8.0f + 16.0f * 2, 16.0f * 13);
-		m_ObjectsQuad[4].Image = ball;
+		m_ObjectsQuad[4].Image = m_BallIdle[0];
 
 
 		m_ScoreQuads[0].Position = glm::vec2(8.0f + 16.0f * 6, 16.0f * 17);
@@ -145,6 +141,7 @@ public:
 	{
 		ServerToClientInGame data = {};
 		Network::GetInstance()->Recv(m_Game->GetSocket(), (char*)&data, sizeof(data));
+		m_Game->SetID(data.ID);
 		
 		for (int i = 0; i < _countof(m_ObjectsQuad); i++)
 		{
@@ -179,7 +176,7 @@ public:
 				if (i == data.ID)
 					m_ObjectsQuad[data.ID].bUseColor = false;
 			}
-			else
+			else if (i==4)
 			{
 				switch (data.AnimationData[i].State)
 				{
@@ -187,9 +184,10 @@ public:
 					m_ObjectsQuad[i].Image = m_BallIdle[data.AnimationData[i].AnimationIndex];
 					break;
 				case BallState::Ball_PowerHiting:
-					if(data.AnimationData[i].AnimationIndex == 2)
+					if (data.AnimationData[i].AnimationIndex == 2)
 						m_ObjectsQuad[i].Image = m_BallIdle[data.AnimationData[i].AnimationIndex];
-					m_ObjectsQuad[i].Image = m_BallPowerHiting[data.AnimationData[i].AnimationIndex];
+					else if(data.AnimationData[i].AnimationIndex <= 2)
+						m_ObjectsQuad[i].Image = m_BallPowerHiting[data.AnimationData[i].AnimationIndex];
 					break;
 				default:
 					break;
@@ -214,41 +212,9 @@ public:
 		}
 
 
-		if (m_bGameIsDone && m_ResultString.empty())
-		{
-			switch (m_Game->GetID())
-			{
-			case 0:
-			case 1:
-				if (data.bLeftTeamWon)
-				{
-					m_ResultString = "WIN";
-					m_ResultBoxColor = glm::vec4(129.0f / 255.0f, 193.0f / 255.0f, 71.0f / 255.0f, 1.0f);
-				}
-				else
-				{
-					m_ResultString = "LOSE";
-					m_ResultBoxColor = glm::vec4(255.0f / 255.0f, 40.0f / 255.0f, 0.0f, 1.0f);
-				}
-				break;
-			case 2:
-			case 3:
-				if (data.bLeftTeamWon)
-				{
-					m_ResultString = "LOSE";
-					m_ResultBoxColor = glm::vec4(255.0f / 255.0f, 40.0f / 255.0f, 0.0f, 1.0f);
-				}
-				else
-				{
-					m_ResultString = "WIN";
-					m_ResultBoxColor = glm::vec4(129.0f / 255.0f, 193.0f / 255.0f, 71.0f / 255.0f, 1.0f);
-				}
-				break;
-
-				break;
-			default:
-				break;
-			}
+		if (m_bGameIsDone)
+		{	
+			m_bLeftTeamWin = data.bLeftTeamWon;
 		}
 	}
 
@@ -264,6 +230,42 @@ public:
 
 		if (m_bGameIsDone)
 		{
+			unsigned int ID = m_Game->GetID();
+			if (m_bLeftTeamWin)
+			{
+				std::cout << ID << "LEFTTEAM WIN!!" << std::endl;
+			}
+			
+			
+			if (ID == 0 || ID == 1)
+			{
+				if (m_bLeftTeamWin)
+				{
+					m_ResultString = "WIN";
+					m_ResultBoxColor = glm::vec4(129.0f / 255.0f, 193.0f / 255.0f, 71.0f / 255.0f, 1.0f);
+				}
+				else
+				{
+					m_ResultString = "LOSE";
+					m_ResultBoxColor = glm::vec4(255.0f / 255.0f, 40.0f / 255.0f, 0.0f, 1.0f);
+				}
+			}
+			else
+			{
+				if (!m_bLeftTeamWin)
+				{
+					m_ResultString = "WIN";
+					m_ResultBoxColor = glm::vec4(129.0f / 255.0f, 193.0f / 255.0f, 71.0f / 255.0f, 1.0f);
+				}
+				else
+				{
+					m_ResultString = "LOSE";
+					m_ResultBoxColor = glm::vec4(255.0f / 255.0f, 40.0f / 255.0f, 0.0f, 1.0f);
+				}
+			}
+
+
+
 			Renderer::Quad gameResultQuad;
 			gameResultQuad.bUseColor = true;
 			gameResultQuad.bUseTexture = false;
@@ -302,15 +304,16 @@ private:
 	Texture m_PickachuWalking[5];
 	Texture m_PickachuJumping[5];
 	Texture m_PickachuPowerHiting[2];
-	Texture m_BallPowerHiting[2];
 	Texture m_PickachuWin[5];
 	Texture m_PickachuLose[5];
+	Texture m_BallPowerHiting[2];
 
 	Texture m_BallIdle[5];
 
 	ServerToClientInGame m_Data = {};
 
 	bool m_bGameIsDone = false;
+	bool m_bLeftTeamWin = false;
 	std::string m_ResultString;
 	glm::vec4 m_ResultBoxColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -687,9 +690,9 @@ public:
 		TextureManager* textureManager = TextureManager::GetInstance();
 		textureManager->LoadTextureAtlas("assets/textures/sprite_sheet.json", "assets/textures/sprite_sheet.png");
 
-		SetGameState(new GameState(this));
+		//SetGameState(new GameState(this));
 		//SetGameState(new LobbyState(this));
-		//SetGameState(new LoginState(this));
+		SetGameState(new LoginState(this));
 	}
 	virtual ~PickachuVolleyBall() = default;
 

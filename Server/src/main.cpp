@@ -10,8 +10,8 @@ DWORD CommunicationThreadProc(LPVOID arg);
 
 std::queue<IData*> g_DataQueue;
 IData* g_ProcessedData[MAX_USER];
-ClientState g_ClientStates[MAX_USER] = { ClientState::Game, ClientState::Game, ClientState::Game, ClientState::Game, }; //TEMP
-//ClientState g_ClientStates[MAX_USER] = { ClientState::Login, ClientState::Login, ClientState::Login, ClientState::Login, }; //TEMP
+//ClientState g_ClientStates[MAX_USER] = { ClientState::Game, ClientState::Game, ClientState::Game, ClientState::Game, }; //TEMP
+ClientState g_ClientStates[MAX_USER] = { ClientState::Login, ClientState::Login, ClientState::Login, ClientState::Login, }; //TEMP
 //ClientState g_ClientStates[MAX_USER] = { ClientState::Lobby, ClientState::Lobby, ClientState::Lobby, ClientState::Lobby, }; //TEMP
 HANDLE g_ClientEvents[MAX_USER];
 int g_ClientCount = 0;
@@ -205,52 +205,61 @@ DWORD CommunicationThreadProc(LPVOID arg)
 				WaitForSingleObject(g_ClientEvents[recvBuffer->ID], INFINITE);
 
 			// 계산된 데이터를 보냄
-			if (g_ProcessedData[recvBuffer->ID])
-			{	
-				if (g_ClientCount >= 4)
+			if (recvBuffer)
+			{
+				if (g_ProcessedData[recvBuffer->ID])
 				{
-					bool bShouldChangeState = true;
-					EnterCriticalSection(&cs);
-					for (int i = 0; i < _countof(g_ClientStates); i++)
+					if (g_ClientCount >= 4)
 					{
-						if(g_ClientStates[i] == ClientState::Login)
-							bShouldChangeState = false;
-
-					}
-					LeaveCriticalSection(&cs);
-
-					if (bShouldChangeState)
-					{
+						bool bShouldChangeState = true;
 						EnterCriticalSection(&cs);
 						for (int i = 0; i < _countof(g_ClientStates); i++)
 						{
-							g_ClientStates[i] = ClientState::Game;
+							if (g_ClientStates[i] == ClientState::Login)
+								bShouldChangeState = false;
+
 						}
 						LeaveCriticalSection(&cs);
-						((ServerToClientInLobby*)g_ProcessedData[recvBuffer->ID])->bShouldStartMatch = true;
-					}
-				}
-				network->Send(clientInformation.Socket, (char*)g_ProcessedData[recvBuffer->ID], sendBufferSize);
 
-				EnterCriticalSection(&cs);
-				switch (g_ClientStates[clientInformation.ID])
-				{
-				case ClientState::Login:
-					if (((ServerToClientInLogin*)g_ProcessedData[recvBuffer->ID])->Result == LoginResult::Succeded)
+						if (bShouldChangeState)
+						{
+							EnterCriticalSection(&cs);
+							for (int i = 0; i < _countof(g_ClientStates); i++)
+							{
+								g_ClientStates[i] = ClientState::Game;
+							}
+							LeaveCriticalSection(&cs);
+							((ServerToClientInLobby*)g_ProcessedData[recvBuffer->ID])->bShouldStartMatch = true;
+						}
+					}
+					network->Send(clientInformation.Socket, (char*)g_ProcessedData[recvBuffer->ID], sendBufferSize);
+
+					EnterCriticalSection(&cs);
+					switch (g_ClientStates[clientInformation.ID])
 					{
-						g_ClientStates[recvBuffer->ID] = ClientState::Lobby;
-					}
-					break;
-						
-				default:
-					break;
-				}
-				LeaveCriticalSection(&cs);
+					case ClientState::Login:
+						if (((ServerToClientInLogin*)g_ProcessedData[recvBuffer->ID])->Result == LoginResult::Succeded)
+						{
+							g_ClientStates[recvBuffer->ID] = ClientState::Lobby;
+						}
+						break;
 
-				delete recvBuffer;
-				delete g_ProcessedData[recvBuffer->ID];
-				g_ProcessedData[recvBuffer->ID] = nullptr;
+					default:
+						break;
+					}
+					LeaveCriticalSection(&cs);
+
+					if (g_ProcessedData[recvBuffer->ID] && recvBuffer)
+					{
+						delete g_ProcessedData[recvBuffer->ID];
+						g_ProcessedData[recvBuffer->ID] = nullptr;
+						delete recvBuffer;
+						recvBuffer = nullptr;
+					}
+
+				}
 			}
+			
 		}
 		
 	}

@@ -4,7 +4,7 @@
 
 enum class ClientState
 {
-	Login, Lobby, Game, AfterGame
+	Login, Lobby, Game
 };
 
 class State
@@ -35,17 +35,16 @@ public:
 		{
 			p.SetAnimationIndex(0);
 			p.SetState(PickachuState::Pickachu_Idle);
-			p.SetVelocity({ 0.0f, 0.0f });
+			p.SetVelocity({ 0.0f, 0.0f});
 		}
 		m_Pickachus[0].SetPosition(glm::vec2(8.0f + 16.0f * 1, 16.0f * 4));
 		m_Pickachus[1].SetPosition(glm::vec2(8.0f + 16.0f * (2 + 4), 16.0f * 4));
 		m_Pickachus[2].SetPosition(glm::vec2(8.0f + 16.0f * 20, 16.0f * 4));
 		m_Pickachus[3].SetPosition(glm::vec2(8.0f + 16.0f * 25, 16.0f * 4));
 
-		m_Ball.SetPosition(glm::vec2(8.0f + 16.0f * 2, 16.0f * 13));
 		m_Ball.SetAnimationIndex(0);
 		m_Ball.SetState(BallState::Ball_Idle);
-		m_Ball.SetVelocity({ 0.0f,0.0f });
+		m_Ball.SetVelocity({ 50.0f, 50.0f });
 	}
 	
 
@@ -83,31 +82,28 @@ public:
 
 				if (!m_bGameIsDone)
 				{
-					if (m_Scores[0] <= MAX_GAME_SCORE && m_Scores[1] <= MAX_GAME_SCORE)
+					if (m_Ball.GetPosition().x < 190)
 					{
-						if (m_Ball.GetPosition().x < 190)
-						{
-							m_Scores[1]++;
-							Reset();
-							m_Ball.SetPosition({ 8.0f + 16.0f * 22, 304.0f });
-						}
-						else if (m_Ball.GetPosition().x > 240)
-						{
-							m_Scores[0]++;
-							Reset();
-							m_Ball.SetPosition({ 8.0f + 16.0f * 3, 304.0f });
-						}
+						m_Scores[1]++;
+						Reset();
+						m_Ball.SetPosition(glm::vec2(8.0f + 16.0f * 25 - 3, 16.0f * 13));
+					}
+					else if (m_Ball.GetPosition().x > 240)
+					{
+						m_Scores[0]++;
+						Reset();
+						m_Ball.SetPosition(glm::vec2(8.0f + 16.0f * 3, 16.0f * 13));
+					}
 
-						if (m_Scores[0] == MAX_GAME_SCORE)
-						{
-							newOutData->bLeftTeamWon = true;
-							m_bGameIsDone = true;
-						}
-						else if (m_Scores[1] == MAX_GAME_SCORE)
-						{
-							newOutData->bLeftTeamWon = false;
-							m_bGameIsDone = true;
-						}
+					if (m_Scores[0] == MAX_GAME_SCORE)
+					{
+						m_bLeftTeamWin = true;
+						m_bGameIsDone = true;
+					}
+					if (m_Scores[1] == MAX_GAME_SCORE)
+					{
+						m_bLeftTeamWin = false;
+						m_bGameIsDone = true;
 					}
 				}
 				
@@ -137,7 +133,7 @@ public:
 				}
 			}
 			
-
+			newOutData->bLeftTeamWon = m_bLeftTeamWin;
 			newOutData->ID = data->ID;
 			newOutData->ObjectPositions[i] = { m_Pickachus[i].GetPosition().x, m_Pickachus[i].GetPosition().y };
 			newOutData->AnimationData[i].State = m_Pickachus[i].GetState();
@@ -201,8 +197,6 @@ private:
 						m_Ball.SetPosition({ m_Ball.GetPosition().x - collidedWidth, m_Ball.GetPosition().y });
 						m_Ball.SetVelocity({ -m_Ball.GetVelocity().x, m_Ball.GetVelocity().y });
 					}
-			 
-
 				}
 				
 				if (bShouldPowerHit)
@@ -343,7 +337,6 @@ public:
 			}
 			else
 			{
-				printf("FAILED!");
 				newOutData->Result = LoginResult::Failed;
 			}
 		}

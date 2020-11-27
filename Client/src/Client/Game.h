@@ -53,6 +53,7 @@ private:
 
 	SOCKET m_Socket = {};
 
+
 	unsigned int m_ID;
 
 	std::string m_ServerIP;
