@@ -157,6 +157,7 @@ DWORD CommunicationThreadProc(LPVOID arg)
 	{
 		int recvBufferSize = 0;
 		int sendBufferSize = 0;
+
 		IData* recvBuffer = nullptr;
 		EnterCriticalSection(&cs);
 		switch (g_ClientStates[clientInformation.ID])
@@ -246,6 +247,7 @@ DWORD CommunicationThreadProc(LPVOID arg)
 				}
 				LeaveCriticalSection(&cs);
 
+				delete recvBuffer;
 				delete g_ProcessedData[recvBuffer->ID];
 				g_ProcessedData[recvBuffer->ID] = nullptr;
 			}

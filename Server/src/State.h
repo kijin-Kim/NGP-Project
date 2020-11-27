@@ -21,14 +21,32 @@ class GameState : public State
 public:
 	GameState()
 	{
-		m_Pickachus[0].SetPosition(glm::vec2(8.0f + 16.0f * 2, 16.0f * 4));
+		m_Pickachus[0].SetPosition(glm::vec2(8.0f + 16.0f * 1, 16.0f * 4));
 		m_Pickachus[1].SetPosition(glm::vec2(8.0f + 16.0f * (2 + 4), 16.0f * 4));
-		m_Pickachus[2].SetPosition(glm::vec2(8.0f + 16.0f * (19 - 2 + 4), 16.0f * 4));
-		m_Pickachus[3].SetPosition(glm::vec2(8.0f + 16.0f * (19 - 2), 16.0f * 4));
+		m_Pickachus[2].SetPosition(glm::vec2(8.0f + 16.0f * 20, 16.0f * 4));
+		m_Pickachus[3].SetPosition(glm::vec2(8.0f + 16.0f * 25, 16.0f * 4));
 		m_Ball.SetPosition(glm::vec2(8.0f + 16.0f * 2, 16.0f * 13));
 	}
 	virtual ~GameState() = default;
 
+	void Reset()
+	{
+		for (auto& p : m_Pickachus)
+		{
+			p.SetAnimationIndex(0);
+			p.SetState(PickachuState::Pickachu_Idle);
+			p.SetVelocity({ 0.0f, 0.0f });
+		}
+		m_Pickachus[0].SetPosition(glm::vec2(8.0f + 16.0f * 2, 16.0f * 4));
+		m_Pickachus[1].SetPosition(glm::vec2(8.0f + 16.0f * (2 + 4), 16.0f * 4));
+		m_Pickachus[2].SetPosition(glm::vec2(8.0f + 16.0f * (19 - 2 + 4), 16.0f * 4));
+		m_Pickachus[3].SetPosition(glm::vec2(8.0f + 16.0f * (19 - 2), 16.0f * 4));
+
+		m_Ball.SetPosition(glm::vec2(8.0f + 16.0f * 2, 16.0f * 13));
+		m_Ball.SetAnimationIndex(0);
+		m_Ball.SetState(BallState::Ball_Idle);
+		m_Ball.SetVelocity({ 0.0f,0.0f });
+	}
 	
 
 	virtual IData* UpdateData(float deltaTime, IData* data) override
@@ -63,9 +81,17 @@ public:
 				m_Ball.SetVelocity({ m_Ball.GetVelocity().x, -m_Ball.GetVelocity().y });
 
 				if (m_Ball.GetPosition().x < 190)
-					m_Scores[0]++;
-				else if (m_Ball.GetPosition().x > 240)
+				{
 					m_Scores[1]++;
+					Reset();
+					m_Ball.SetPosition({ 8.0f + 16.0f * 25, 304.0f });
+				}
+				else if (m_Ball.GetPosition().x > 240)
+				{
+					m_Scores[0]++;
+					Reset();
+					m_Ball.SetPosition({ 8.0f + 16.0f * 1, 304.0f });
+				}
 			}
 
 			m_Pickachus[0].SetPosition(glm::clamp(m_Pickachus[0].GetPosition(), { 8.0f + 16.0f * 1, 16.0f * 4.0f }, { 8.0f + 16.0f * 11, 304.0f}));
