@@ -10,9 +10,13 @@ DWORD CommunicationThreadProc(LPVOID arg);
 
 std::queue<IData*> g_DataQueue;
 IData* g_ProcessedData[MAX_USER];
-ClientState g_ClientStates[MAX_USER] = { ClientState::Game, ClientState::Game, ClientState::Game, ClientState::Game, }; //TEMP
+//ClientState g_ClientStates[MAX_USER] = { ClientState::Game, ClientState::Game, ClientState::Game, ClientState::Game, }; //TEMP
+ClientState g_ClientStates[MAX_USER] = { ClientState::Login, ClientState::Login, ClientState::Login, ClientState::Login, }; //TEMP
+//ClientState g_ClientStates[MAX_USER] = { ClientState::Lobby, ClientState::Lobby, ClientState::Lobby, ClientState::Lobby, }; //TEMP
 HANDLE g_ClientEvents[MAX_USER];
+int g_ClientCount = 0;
 
+CRITICAL_SECTION cs;
 
 struct ClientInformation
 {
@@ -26,6 +30,8 @@ int main()
 	LobbyState* lobbyState = new LobbyState();
 	GameState* gameState = new GameState();
 	LoginState* loginState = new LoginState();
+
+	InitializeCriticalSection(&cs);
 
 	char buf[BUFSIZE + 1];
 	Network* network = Network::GetInstance();
@@ -59,19 +65,19 @@ int main()
 		
 		if (g_DataQueue.empty())
 		{
+			EnterCriticalSection(&cs);
 			for (auto s : g_ClientStates)
 			{
 				switch (s)
 				{
-				case ClientState::Login:
-					loginState->UpdateData(deltaTime, nullptr);
-					break;
 				case ClientState::Game:
 					gameState->UpdateData(deltaTime, nullptr);
 					break;
-				
+				default:
+					break;
 				}
 			}
+			LeaveCriticalSection(&cs);
 			continue;
 		}
 
@@ -82,12 +88,21 @@ int main()
 
 		//로직을 계산한다.
 		
+		EnterCriticalSection(&cs);
 		switch (g_ClientStates[data->ID])
 		{
 		case ClientState::Login:
-			loginState->UpdateData(deltaTime, data);
+		{
+			LeaveCriticalSection(&cs);
+			g_ProcessedData[data->ID] = loginState->UpdateData(deltaTime, data);
+			break;
+		}
+		case ClientState::Lobby:
+			LeaveCriticalSection(&cs);
+			g_ProcessedData[data->ID] = lobbyState->UpdateData(deltaTime, data);
 			break;
 		case ClientState::Game:
+			LeaveCriticalSection(&cs);
 			g_ProcessedData[data->ID] = gameState->UpdateData(deltaTime, data);
 			break;
 		default:
@@ -98,24 +113,24 @@ int main()
 		SetEvent(g_ClientEvents[data->ID]);
 	}
 
+	DeleteCriticalSection(&cs);
+
 }
 
 DWORD ListeningThreadProc(LPVOID)
 {
-	static int clientCount = 0;
-
 	Network* network = Network::GetInstance();
 	SOCKET listeningSocket = socket(AF_INET, SOCK_STREAM, 0);
 
 
 	network->BindAndListen(listeningSocket);
 
-	while (clientCount <= 4)
+	while (g_ClientCount <= 4)
 	{
 		SOCKET clientSocket = network->Accept(listeningSocket);
-		printf("%d 번째 클라이언트 접속!", clientCount);
+		printf("%d 번째 클라이언트 접속!", g_ClientCount);
 
-		ClientInformation information = { clientCount++, clientSocket };
+		ClientInformation information = { g_ClientCount++, clientSocket };
 
 		// CLIENT 마다 쓰레드를 만들어줌
 		HANDLE hThread = CreateThread(NULL, 0, CommunicationThreadProc, (LPVOID)&information, 0, NULL);
@@ -142,27 +157,36 @@ DWORD CommunicationThreadProc(LPVOID arg)
 	{
 		int recvBufferSize = 0;
 		int sendBufferSize = 0;
+
 		IData* recvBuffer = nullptr;
+
+		ClientToServerInLogin ToServerLogin = {};
+		ClientToServerInLobby ToServerLobby = {};
+		ClientToServerInGame ToServerGame = {};
+
+		EnterCriticalSection(&cs);
 		switch (g_ClientStates[clientInformation.ID])
 		{
 		case ClientState::Login:
 			recvBufferSize = sizeof(ClientToServerInLogin);
-			recvBuffer = new ClientToServerInLogin();
+			recvBuffer = &ToServerLogin;
 			sendBufferSize = sizeof(ServerToClientInLogin);
 			break;
 		case ClientState::Lobby:
 			recvBufferSize = sizeof(ClientToServerInLobby);
-			recvBuffer = new ClientToServerInLobby();
+			recvBuffer = &ToServerLobby;
 			sendBufferSize = sizeof(ServerToClientInLobby);
 			break;
 		case ClientState::Game:
 			recvBufferSize = sizeof(ClientToServerInGame);
-			recvBuffer = new ClientToServerInGame();
+			recvBuffer = &ToServerGame;
 			sendBufferSize = sizeof(ServerToClientInGame);
 			break;		
 		default:
 			break;
 		}
+		LeaveCriticalSection(&cs);
+
 		
 		if (recvBuffer)
 		{
@@ -186,12 +210,60 @@ DWORD CommunicationThreadProc(LPVOID arg)
 				WaitForSingleObject(g_ClientEvents[recvBuffer->ID], INFINITE);
 
 			// 계산된 데이터를 보냄
-			if (g_ProcessedData[recvBuffer->ID])
-			{			
-				network->Send(clientInformation.Socket, (char*)g_ProcessedData[recvBuffer->ID], sendBufferSize);
-				delete g_ProcessedData[recvBuffer->ID];
-				g_ProcessedData[recvBuffer->ID] = nullptr;
+			if (recvBuffer)
+			{
+				if (g_ProcessedData[recvBuffer->ID])
+				{
+					if (g_ClientCount >= 4)
+					{
+						bool bShouldChangeState = true;
+						EnterCriticalSection(&cs);
+						for (int i = 0; i < _countof(g_ClientStates); i++)
+						{
+							if (g_ClientStates[i] == ClientState::Login)
+								bShouldChangeState = false;
+
+						}
+						LeaveCriticalSection(&cs);
+
+						if (bShouldChangeState)
+						{
+							EnterCriticalSection(&cs);
+							for (int i = 0; i < _countof(g_ClientStates); i++)
+							{
+								g_ClientStates[i] = ClientState::Game;
+							}
+							LeaveCriticalSection(&cs);
+							((ServerToClientInLobby*)g_ProcessedData[recvBuffer->ID])->bShouldStartMatch = true;
+						}
+					}
+					network->Send(clientInformation.Socket, (char*)g_ProcessedData[recvBuffer->ID], sendBufferSize);
+
+					EnterCriticalSection(&cs);
+					switch (g_ClientStates[clientInformation.ID])
+					{
+					case ClientState::Login:
+						if (((ServerToClientInLogin*)g_ProcessedData[recvBuffer->ID])->Result == LoginResult::Succeded)
+						{
+							g_ClientStates[recvBuffer->ID] = ClientState::Lobby;
+						}
+						break;
+
+					default:
+						break;
+					}
+					LeaveCriticalSection(&cs);
+
+					if (g_ProcessedData[recvBuffer->ID] && recvBuffer)
+					{
+						delete g_ProcessedData[recvBuffer->ID];
+						g_ProcessedData[recvBuffer->ID] = nullptr;
+						recvBuffer = nullptr;
+					}
+
+				}
 			}
+			
 		}
 		
 	}

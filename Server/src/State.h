@@ -21,14 +21,31 @@ class GameState : public State
 public:
 	GameState()
 	{
-		m_Pickachus[0].SetPosition(glm::vec2(8.0f + 16.0f * 2, 16.0f * 4));
+		m_Pickachus[0].SetPosition(glm::vec2(8.0f + 16.0f * 1, 16.0f * 4));
 		m_Pickachus[1].SetPosition(glm::vec2(8.0f + 16.0f * (2 + 4), 16.0f * 4));
-		m_Pickachus[2].SetPosition(glm::vec2(8.0f + 16.0f * (19 - 2 + 4), 16.0f * 4));
-		m_Pickachus[3].SetPosition(glm::vec2(8.0f + 16.0f * (19 - 2), 16.0f * 4));
+		m_Pickachus[2].SetPosition(glm::vec2(8.0f + 16.0f * 20, 16.0f * 4));
+		m_Pickachus[3].SetPosition(glm::vec2(8.0f + 16.0f * 25, 16.0f * 4));
 		m_Ball.SetPosition(glm::vec2(8.0f + 16.0f * 2, 16.0f * 13));
 	}
 	virtual ~GameState() = default;
 
+	void Reset()
+	{
+		for (auto& p : m_Pickachus)
+		{
+			p.SetAnimationIndex(0);
+			p.SetState(PickachuState::Pickachu_Idle);
+			p.SetVelocity({ 0.0f, 0.0f});
+		}
+		m_Pickachus[0].SetPosition(glm::vec2(8.0f + 16.0f * 1, 16.0f * 4));
+		m_Pickachus[1].SetPosition(glm::vec2(8.0f + 16.0f * (2 + 4), 16.0f * 4));
+		m_Pickachus[2].SetPosition(glm::vec2(8.0f + 16.0f * 20, 16.0f * 4));
+		m_Pickachus[3].SetPosition(glm::vec2(8.0f + 16.0f * 25, 16.0f * 4));
+
+		m_Ball.SetAnimationIndex(0);
+		m_Ball.SetState(BallState::Ball_Idle);
+		m_Ball.SetVelocity({ 50.0f, 50.0f });
+	}
 	
 
 	virtual IData* UpdateData(float deltaTime, IData* data) override
@@ -57,22 +74,77 @@ public:
 
 			m_Ball.Update(deltaTime);
 
+			if (m_Ball.GetPosition().y < 16.0f * 4.0f)
+			{
+				m_Ball.SetPosition({ m_Ball.GetPosition().x, 16.0f * 4.0f });
+				m_Ball.SetVelocity({ m_Ball.GetVelocity().x, -m_Ball.GetVelocity().y });
+
+
+				if (!m_bGameIsDone)
+				{
+					if (m_Ball.GetPosition().x < 190)
+					{
+						m_Scores[1]++;
+						Reset();
+						m_Ball.SetPosition(glm::vec2(8.0f + 16.0f * 25 - 3, 16.0f * 13));
+					}
+					else if (m_Ball.GetPosition().x > 240)
+					{
+						m_Scores[0]++;
+						Reset();
+						m_Ball.SetPosition(glm::vec2(8.0f + 16.0f * 3, 16.0f * 13));
+					}
+
+					if (m_Scores[0] == MAX_GAME_SCORE)
+					{
+						m_bLeftTeamWin = true;
+						m_bGameIsDone = true;
+					}
+					if (m_Scores[1] == MAX_GAME_SCORE)
+					{
+						m_bLeftTeamWin = false;
+						m_bGameIsDone = true;
+					}
+				}
+				
+				
+			}
+
 			m_Pickachus[0].SetPosition(glm::clamp(m_Pickachus[0].GetPosition(), { 8.0f + 16.0f * 1, 16.0f * 4.0f }, { 8.0f + 16.0f * 11, 304.0f}));
 			m_Pickachus[1].SetPosition(glm::clamp(m_Pickachus[1].GetPosition(), { 8.0f + 16.0f * 1, 16.0f * 4.0f }, { 8.0f + 16.0f * 11, 304.0f }));
 			m_Pickachus[2].SetPosition(glm::clamp(m_Pickachus[2].GetPosition(), { 8.0f + 16.0f * 15, 16.0f * 4.0f }, { 8.0f + 16.0f * 25, 304.0f }));
 			m_Pickachus[3].SetPosition(glm::clamp(m_Pickachus[3].GetPosition(), { 8.0f + 16.0f * 15, 16.0f * 4.0f }, { 8.0f + 16.0f * 25, 304.0f }));
 
+			if (m_bGameIsDone)
+			{
+				if (m_bLeftTeamWin)
+				{
+					m_Pickachus[0].SetState(PickachuState::Pickachu_Win);
+					m_Pickachus[1].SetState(PickachuState::Pickachu_Win);
+					m_Pickachus[2].SetState(PickachuState::Pickachu_Lose);
+					m_Pickachus[3].SetState(PickachuState::Pickachu_Lose);
+				}
+				else if (!m_bLeftTeamWin)
+				{
+					m_Pickachus[0].SetState(PickachuState::Pickachu_Lose);
+					m_Pickachus[1].SetState(PickachuState::Pickachu_Lose);
+					m_Pickachus[2].SetState(PickachuState::Pickachu_Win);
+					m_Pickachus[3].SetState(PickachuState::Pickachu_Win);
+				}
+			}
+			
+			newOutData->bLeftTeamWon = m_bLeftTeamWin;
 			newOutData->ID = data->ID;
 			newOutData->ObjectPositions[i] = { m_Pickachus[i].GetPosition().x, m_Pickachus[i].GetPosition().y };
 			newOutData->AnimationData[i].State = m_Pickachus[i].GetState();
 			newOutData->AnimationData[i].AnimationIndex = m_Pickachus[i].GetAnimationIndex();
-			
-			
 		}
 		
 		newOutData->ObjectPositions[4] = { m_Ball.GetPosition().x, m_Ball.GetPosition().y };
 		newOutData->AnimationData[4].AnimationIndex = m_Ball.GetAnimationIndex();
 		newOutData->AnimationData[4].State = m_Ball.GetState();
+		newOutData->Scores[0] = m_Scores[0];
+		newOutData->Scores[1] = m_Scores[1];
 
 		return newOutData;
 	}
@@ -84,6 +156,8 @@ private:
 		for (int i = 0; i < _countof(m_Pickachus); i++)
 		{
 			AABBBox box2 = m_Pickachus[i].GetAABBBox();
+			bool bShouldPowerHit = m_Pickachus[i].GetState() == PickachuState::Pickachu_PowerHiting;
+			bool bBallWasPowerHiting = m_Ball.GetState() == BallState::Ball_PowerHiting;
 			if (box2.Left <= box1.Right &&
 				box1.Left <= box2.Right &&
 				box2.Bottom <= box1.Top &&
@@ -101,7 +175,6 @@ private:
 						float collidedHeight = box2.Top - box1.Bottom;
 						m_Ball.SetPosition({ m_Ball.GetPosition().x, m_Ball.GetPosition().y + collidedHeight });
 						m_Ball.SetVelocity({ m_Ball.GetVelocity().x, -m_Ball.GetVelocity().y });
-
 					}
 					else
 					{
@@ -124,10 +197,18 @@ private:
 						m_Ball.SetPosition({ m_Ball.GetPosition().x - collidedWidth, m_Ball.GetPosition().y });
 						m_Ball.SetVelocity({ -m_Ball.GetVelocity().x, m_Ball.GetVelocity().y });
 					}
-			 
-
 				}
 				
+				if (bShouldPowerHit)
+				{
+					m_Ball.SetVelocity({ m_Ball.GetVelocity().x * 1.5f, m_Ball.GetVelocity().y * 1.5f });
+					m_Ball.SetState(BallState::Ball_PowerHiting);
+				}
+				else if (bBallWasPowerHiting)
+				{
+					m_Ball.SetVelocity({ m_Ball.GetVelocity().x / 2.0f, m_Ball.GetVelocity().y / 2.0f });
+					m_Ball.SetState(BallState::Ball_Idle);
+				}
 
 			}
 		}
@@ -180,11 +261,7 @@ private:
 				}
 			}
 			
-		}
-
-
-		// BALL VS NET
-		
+		}		
 
 	}
 
@@ -192,6 +269,8 @@ private:
 	Pickachu m_Pickachus[4]; // Client 1, 2, 3, 4
 	Ball m_Ball;
 	unsigned int m_Scores[2] = { 0, 0 };
+	bool m_bLeftTeamWin = false;
+	bool m_bGameIsDone = false;
 };
 
 class LobbyState : public State
@@ -199,8 +278,38 @@ class LobbyState : public State
 public:
 	LobbyState() = default;
 	virtual ~LobbyState() = default;
-	virtual IData* UpdateData(float deltaTime, IData* data) override { return nullptr; }
-	
+	virtual IData* UpdateData(float deltaTime, IData* data) override
+	{
+		ServerToClientInLobby* newOutData = new ServerToClientInLobby();
+		if (data)
+		{
+			ClientToServerInLobby* fromClientData = (ClientToServerInLobby*)data;
+			if (fromClientData->Chat[0] != 0)
+			{
+				wchar_t buffer[200];
+				wsprintfW(buffer, L"[Client %d ]: %s", data->ID, fromClientData->Chat);
+
+				wcscpy(m_Chats[m_ChatIndex].Line, buffer);
+				if (wcslen(buffer) >= 45)
+					m_ChatIndex++;
+				m_ChatIndex++;
+
+			}
+			newOutData->ID = data->ID;
+			newOutData->bShouldStartMatch = false;
+			memcpy(newOutData->Chats, m_Chats, sizeof(m_Chats));
+			if (m_ChatIndex >= 16)
+			{
+				m_ChatIndex = 0;
+				ZeroMemory(m_Chats, sizeof(m_Chats));
+			}
+		}
+		return newOutData;
+	}
+
+private:
+	ChatLine m_Chats[16];
+	unsigned int m_ChatIndex = 0;
 };
 
 class LoginState : public State
@@ -211,13 +320,30 @@ public:
 
 	virtual IData* UpdateData(float deltaTime, IData* data) override
 	{
-		ClientToServerInLogin* fromClientData = (ClientToServerInLogin*)data;
-		
 		ServerToClientInLogin* newOutData = new ServerToClientInLogin();
-		newOutData->bLoginResult = true;
-		newOutData->ID = data->ID;
+		if (data)
+		{
+			ClientToServerInLogin* fromClientData = (ClientToServerInLogin*)data;
+			newOutData->ID = fromClientData->ID;
+			auto result = std::find(std::begin(m_Names), std::end(m_Names), fromClientData->NickName);
+			if (fromClientData->NickName[0] == 0)
+			{
+				newOutData->Result = LoginResult::None;
+			}
+			else if (result == std::end(m_Names) && m_NameCount < 4)
+			{
+				newOutData->Result = LoginResult::Succeded;
+				m_Names[m_NameCount++] = fromClientData->NickName;
+			}
+			else
+			{
+				newOutData->Result = LoginResult::Failed;
+			}
+		}
+		
 
 		return newOutData;
+
 	}
 
 private:

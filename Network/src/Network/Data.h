@@ -1,6 +1,26 @@
 #pragma once
 #include <cstdint>
 
+//////////////////////// GLOBAL ENUM, DEFINES //////////////////////////////
+
+#define MAX_GAME_SCORE 12
+
+enum LoginResult
+{
+	None = 0, Failed, Succeded
+};
+
+enum PickachuState
+{
+	Pickachu_Idle = 0, Pickachu_Jumping, Pickachu_Walking, Pickachu_PowerHiting, Pickachu_Win, Pickachu_Lose
+};
+
+enum BallState
+{
+	Ball_Idle = 4, Ball_PowerHiting
+};
+
+
 #pragma pack(push)
 #pragma pack(1)
 
@@ -43,6 +63,7 @@ struct ServerToClientInGame : public IData //Client가 게임을 렌더링할 때 필요한 
 	float2 ObjectPositions[5]; //게임내의 모든 오브젝트의 위치(플레이어 4명, 공 1개)
 	uint8_t Scores[2];     //게임내의 팀의 점수(순서대로 좌측 팀, 우측 팀)
 	Animation AnimationData[5];  //애니메이션 데이터
+	bool bLeftTeamWon = false; // 게임이 끝났을 때 (어느 한 쪽팀이 목표점수에 도달하였을 때), 확인하는 Boolean, True 왼쪽팀 승리 False 오른쪽팀 승리
 };
 
 
@@ -54,13 +75,18 @@ struct ServerToClientInGame : public IData //Client가 게임을 렌더링할 때 필요한 
 
 struct ClientToServerInLobby : public IData  //서버가 로비에서 Client에게 넘겨줄(Client가 렌더링할때 필요한) 데이터를 계산하기 위해 필요한 데이터
 {
-	wchar_t Chat[256];
+	wchar_t Chat[256] = {};
+};
+
+struct ChatLine
+{
+	wchar_t Line[50] = {};
 };
 
 struct ServerToClientInLobby : public IData //Client가 로비를 렌더링할 때 필요한 계산된 데이터
 {
-	wchar_t Chats[2048];
-	bool bShouldStartMatch;
+	ChatLine Chats[16] = {};
+	bool bShouldStartMatch = false;
 };
 
 
@@ -72,19 +98,12 @@ struct ServerToClientInLobby : public IData //Client가 로비를 렌더링할 때 필요한
 
 struct ClientToServerInLogin : public IData //클라이언트가 서버에게 보낼 닉네임
 {
-	wchar_t NickName[8];
+	wchar_t NickName[20] = {};
 };
 struct ServerToClientInLogin : public IData //서버가 클라이언트에게 보내는 로그인 성공여부(중복 시, 실패)
 {
-	bool bLoginResult;
+	LoginResult Result = None;
 };
+
 
 #pragma pack(pop)
-
-
-//////////////////////// GLOBAL ENUM
-
-enum PickachuState
-{
-	Idle = 0, Jumping, Walking, Sliding
-};

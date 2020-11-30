@@ -28,7 +28,6 @@ public:
 	Renderer(int width, int height);
 	~Renderer();
 
-	void Reset();
 	void Clear();
 	void DrawQuad(const Quad& quad);
 	
@@ -40,6 +39,5 @@ private:
 	unsigned int m_BufferIDs[3];
 	Shader* m_Shader;
 
-	static std::vector<Quad> m_Quads;
 };
 

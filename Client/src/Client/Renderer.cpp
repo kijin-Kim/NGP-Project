@@ -1,9 +1,5 @@
 #include "Renderer.h"
 
-
-
-std::vector<Renderer::Quad> Renderer::m_Quads;
-
 Renderer::Renderer(int width, int height)
 {
 	m_Shader = new Shader("assets/shaders/VertexShader.glsl", "assets/shaders/FragmentShader.glsl");
@@ -90,12 +86,6 @@ Renderer::Renderer(int width, int height)
 Renderer::~Renderer()
 {
 	delete m_Shader;
-}
-
-
-void Renderer::Reset()
-{
-	m_Quads.clear();
 }
 
 void Renderer::Clear()
