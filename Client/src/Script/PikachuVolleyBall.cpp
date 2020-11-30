@@ -17,7 +17,6 @@ public:
 
 		// TEMP
 
-
 		m_PickachuWalking[0] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_0_0.png");
 		m_PickachuWalking[1] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_0_1.png");
 		m_PickachuWalking[2] = textureManager->GetTextureFromAtlas("assets/textures/sprite_sheet.png", "pikachu/pikachu_0_2.png");
@@ -299,7 +298,6 @@ private:
 	Renderer::Quad m_MapQuad;
 	
 	Texture m_Numbers[10];
-
 	// ANIMATION TEXTURES
 	Texture m_PickachuWalking[5];
 	Texture m_PickachuJumping[5];
@@ -307,7 +305,6 @@ private:
 	Texture m_PickachuWin[5];
 	Texture m_PickachuLose[5];
 	Texture m_BallPowerHiting[2];
-
 	Texture m_BallIdle[5];
 
 	ServerToClientInGame m_Data = {};
@@ -690,8 +687,6 @@ public:
 		TextureManager* textureManager = TextureManager::GetInstance();
 		textureManager->LoadTextureAtlas("assets/textures/sprite_sheet.json", "assets/textures/sprite_sheet.png");
 
-		//SetGameState(new GameState(this));
-		//SetGameState(new LobbyState(this));
 		SetGameState(new LoginState(this));
 	}
 	virtual ~PickachuVolleyBall() = default;
