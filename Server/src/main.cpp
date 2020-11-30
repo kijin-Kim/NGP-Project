@@ -159,22 +159,27 @@ DWORD CommunicationThreadProc(LPVOID arg)
 		int sendBufferSize = 0;
 
 		IData* recvBuffer = nullptr;
+
+		ClientToServerInLogin ToServerLogin = {};
+		ClientToServerInLobby ToServerLobby = {};
+		ClientToServerInGame ToServerGame = {};
+
 		EnterCriticalSection(&cs);
 		switch (g_ClientStates[clientInformation.ID])
 		{
 		case ClientState::Login:
 			recvBufferSize = sizeof(ClientToServerInLogin);
-			recvBuffer = new ClientToServerInLogin();
+			recvBuffer = &ToServerLogin;
 			sendBufferSize = sizeof(ServerToClientInLogin);
 			break;
 		case ClientState::Lobby:
 			recvBufferSize = sizeof(ClientToServerInLobby);
-			recvBuffer = new ClientToServerInLobby();
+			recvBuffer = &ToServerLobby;
 			sendBufferSize = sizeof(ServerToClientInLobby);
 			break;
 		case ClientState::Game:
 			recvBufferSize = sizeof(ClientToServerInGame);
-			recvBuffer = new ClientToServerInGame();
+			recvBuffer = &ToServerGame;
 			sendBufferSize = sizeof(ServerToClientInGame);
 			break;		
 		default:
@@ -253,7 +258,6 @@ DWORD CommunicationThreadProc(LPVOID arg)
 					{
 						delete g_ProcessedData[recvBuffer->ID];
 						g_ProcessedData[recvBuffer->ID] = nullptr;
-						delete recvBuffer;
 						recvBuffer = nullptr;
 					}
 
