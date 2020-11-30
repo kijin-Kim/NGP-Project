@@ -3,7 +3,7 @@
 
 //////////////////////// GLOBAL ENUM, DEFINES //////////////////////////////
 
-#define MAX_GAME_SCORE 12
+#define MAX_GAME_SCORE 15
 
 enum LoginResult
 {
