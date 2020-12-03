@@ -32,8 +32,8 @@ void Log(const std::string& addr, const std::string& messageFormat)
 			currentTime.wMonth,
 			currentTime.wDay,
 			currentTime.wHour,
-			currentTime.wSecond,
 			currentTime.wMinute,
+			currentTime.wSecond,
 			addr.c_str(),
 			messageFormat.c_str());
 		g_OutFile << logBuffer;
@@ -185,7 +185,7 @@ DWORD CommunicationThreadProc(LPVOID arg)
 	g_ClientEvents[clientInformation.ID] = CreateEvent(NULL, FALSE, FALSE, NULL);
 	if (clientInformation.ID >= 3)
 		TerminateThread(g_ListeningThreadHandle, 0);
-
+	
 	
 	while (true) 
 	{
