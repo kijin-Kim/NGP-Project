@@ -45,7 +45,7 @@ public:
 		JSONCPP_STRING errs;
 		bool bIsOk = parseFromStream(builder, jsonFile, &value, &errs);
 		if (!bIsOk)
-			assert(false && "Json FileÀ» ÆÄ½ÌÇÏ´Âµ¥ ½ÇÆĞÇÏ¿´½À´Ï´Ù.");
+			assert(false && "Json Fileì„ íŒŒì‹±í•˜ëŠ”ë° ì‹¤íŒ¨í•˜ì˜€ìŠµë‹ˆë‹¤.");
 
 
 		for (int i = 0; i < value.size(); i++)
@@ -74,7 +74,7 @@ public:
 		Texture texture = {};
 
 		if (m_TextureCache.find(alias) == m_TextureCache.end())
-			assert(false && "ÅØ½ºÃÄ¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù. ¸ÕÀú ·Îµå ÇØÁÖ¼¼¿ä");
+			assert(false && "í…ìŠ¤ì³ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. ë¨¼ì € ë¡œë“œ í•´ì£¼ì„¸ìš”");
 
 		texture.Data = m_TextureCache[alias];
 		texture.W = texture.Data->GetWidth();
@@ -88,12 +88,12 @@ public:
 		Texture texture = {};
 
 		if (m_TextureAtlasCache.find(textureAtlasName) == m_TextureAtlasCache.end())
-			assert(false && "ÅØ½ºÃÄ ¾ÆÆ²¶ó½º¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù. ¸ÕÀú ·Îµå ÇØÁÖ¼¼¿ä");
+			assert(false && "í…ìŠ¤ì³ ì•„í‹€ë¼ìŠ¤ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. ë¨¼ì € ë¡œë“œ í•´ì£¼ì„¸ìš”");
 
 		TextureAtlasData* texAtalsData = m_TextureAtlasCache[textureAtlasName];
 
 		if (texAtalsData->AtlasDataMap.find(textureName) == texAtalsData->AtlasDataMap.end())
-			assert(false && "ÅØ½ºÃÄ ¾ÆÆ²¶ó½º¿¡¼­ ÅØ½ºÃÄ¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù. ÅØ½ºÃÄ ¾ÆÆ²¶ó½º Json FileÀ» È®ÀÎÇØÁÖ¼¼¿ä");
+			assert(false && "í…ìŠ¤ì³ ì•„í‹€ë¼ìŠ¤ì—ì„œ í…ìŠ¤ì³ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. í…ìŠ¤ì³ ì•„í‹€ë¼ìŠ¤ Json Fileì„ í™•ì¸í•´ì£¼ì„¸ìš”");
 
 	
 

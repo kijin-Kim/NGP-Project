@@ -122,7 +122,7 @@ public:
 		auto& inputQueue = m_Game->GetInputQueue();
 		input.Key = -1;
 
-		if (!m_bGameIsDone) // °ÔÀÓÀÌ ³¡³ª¸é Á¶ÀÛ ºÒ°¡´É
+		if (!m_bGameIsDone) // ê²Œì„ì´ ëë‚˜ë©´ ì¡°ì‘ ë¶ˆê°€ëŠ¥
 		{
 			if (!inputQueue.empty())
 			{

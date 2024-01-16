@@ -24,7 +24,7 @@ public:
 		unsigned char* data = stbi_load(filePath.c_str(), &m_Width, &m_Height, &nrChannels, 0);
 		if (!data)
 		{
-			assert(false && "ÅØ½ºÃÄ¸¦ ·ÎµåÇÏ´Âµ¥ ½ÇÆĞÇÏ¿´½À´Ï´Ù.");
+			assert(false && "í…ìŠ¤ì³ë¥¼ ë¡œë“œí•˜ëŠ”ë° ì‹¤íŒ¨í•˜ì˜€ìŠµë‹ˆë‹¤.");
 		}
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);

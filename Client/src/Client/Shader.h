@@ -17,7 +17,7 @@ public:
 	{
 		int uniformLocation = glGetUniformLocation(m_ID, name.c_str());
 		if (uniformLocation == -1)
-			assert(false && "Uniform º¯¼öÀÇ À§Ä¡¸¦ Ã£´Âµ¥ ½ÇÆĞÇÏ¿´½À´Ï´Ù.");
+			assert(false && "Uniform ë³€ìˆ˜ì˜ ìœ„ì¹˜ë¥¼ ì°¾ëŠ”ë° ì‹¤íŒ¨í•˜ì˜€ìŠµë‹ˆë‹¤.");
 		glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
@@ -25,7 +25,7 @@ public:
 	{
 		int uniformLocation = glGetUniformLocation(m_ID, name.c_str());
 		if (uniformLocation == -1)
-			assert(false && "Uniform º¯¼öÀÇ À§Ä¡¸¦ Ã£´Âµ¥ ½ÇÆĞÇÏ¿´½À´Ï´Ù.");
+			assert(false && "Uniform ë³€ìˆ˜ì˜ ìœ„ì¹˜ë¥¼ ì°¾ëŠ”ë° ì‹¤íŒ¨í•˜ì˜€ìŠµë‹ˆë‹¤.");
 		glUniform4fv(uniformLocation, 1, glm::value_ptr(value));
 	}
 
@@ -33,7 +33,7 @@ public:
 	{
 		int uniformLocation = glGetUniformLocation(m_ID, name.c_str());
 		if (uniformLocation == -1)
-			assert(false && "Uniform º¯¼öÀÇ À§Ä¡¸¦ Ã£´Âµ¥ ½ÇÆĞÇÏ¿´½À´Ï´Ù.");
+			assert(false && "Uniform ë³€ìˆ˜ì˜ ìœ„ì¹˜ë¥¼ ì°¾ëŠ”ë° ì‹¤íŒ¨í•˜ì˜€ìŠµë‹ˆë‹¤.");
 		glUniform1i(uniformLocation, value);
 	}
 

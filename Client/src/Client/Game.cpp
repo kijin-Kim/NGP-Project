@@ -18,7 +18,7 @@ Game::Game(int width, int height, const std::string& serverIP) :
 	std::locale::global(std::locale(""));
 	/* Initialize the library */
 	int result = glfwInit();
-	assert(result && "GLFW¸¦ ÃÊ±âÈ­ ÇÏ´Âµ¥ ½ÇÆĞÇÏ¿´½À´Ï´Ù.");
+	assert(result && "GLFWë¥¼ ì´ˆê¸°í™” í•˜ëŠ”ë° ì‹¤íŒ¨í•˜ì˜€ìŠµë‹ˆë‹¤.");
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -29,7 +29,7 @@ Game::Game(int width, int height, const std::string& serverIP) :
 	/* Create a windowed mode window and its OpenGL context */
 
 	m_Window = glfwCreateWindow(m_Width, m_Height, "Pickachu VolleyBall", NULL, NULL);
-	assert(m_Window && "GLFW Window¸¦ »ı¼ºÇÏ´Âµ¥ ½ÇÆĞÇÏ¿´½À´Ï´Ù.");
+	assert(m_Window && "GLFW Windowë¥¼ ìƒì„±í•˜ëŠ”ë° ì‹¤íŒ¨í•˜ì˜€ìŠµë‹ˆë‹¤.");
 
 	/* Make the window's context current */
 	glfwMakeContextCurrent(m_Window);

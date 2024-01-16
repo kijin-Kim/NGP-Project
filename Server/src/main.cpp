@@ -107,11 +107,11 @@ int main()
 		}
 
 
-		//Å¬¶ó°¡ º¸³½ µ¥ÀÌÅÍ¸¦ ²¨³½´Ù.
+		//í´ë¼ê°€ ë³´ë‚¸ ë°ì´í„°ë¥¼ êº¼ë‚¸ë‹¤.
 		IData* data = g_DataQueue.front();	
 		g_DataQueue.pop();
 
-		//·ÎÁ÷À» °è»êÇÑ´Ù.
+		//ë¡œì§ì„ ê³„ì‚°í•œë‹¤.
 		
 		EnterCriticalSection(&cs);
 		switch (g_ClientStates[data->ID])
@@ -134,7 +134,7 @@ int main()
 			break;
 		}
 
-		//»õ·Î¿î µ¥ÀÌÅÍ¸¦ ³Ö´Â´Ù.
+		//ìƒˆë¡œìš´ ë°ì´í„°ë¥¼ ë„£ëŠ”ë‹¤.
 		SetEvent(g_ClientEvents[data->ID]);
 	}
 
@@ -162,8 +162,8 @@ DWORD ListeningThreadProc(LPVOID)
 		int socketAddrSize = sizeof(socketAddr);
 		getpeername(information.Socket, (SOCKADDR*)&socketAddr, &socketAddrSize);
 		g_ClientAddress[information.ID] = inet_ntoa(socketAddr.sin_addr);
-		Log(g_ClientAddress[information.ID], "Å¬¶óÀÌ¾ğÆ® Á¢¼Ó");
-		// CLIENT ¸¶´Ù ¾²·¹µå¸¦ ¸¸µé¾îÁÜ
+		Log(g_ClientAddress[information.ID], "í´ë¼ì´ì–¸íŠ¸ ì ‘ì†");
+		// CLIENT ë§ˆë‹¤ ì“°ë ˆë“œë¥¼ ë§Œë“¤ì–´ì¤Œ
 		HANDLE hThread = CreateThread(NULL, 0, CommunicationThreadProc, (LPVOID)&information, 0, NULL);
 		if (!hThread)
 		{
@@ -229,7 +229,7 @@ DWORD CommunicationThreadProc(LPVOID arg)
 		
 		if (recvBuffer)
 		{
-			// Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ µ¥ÀÌÅÍ¸¦ ¹ŞÀ½.
+			// í´ë¼ì´ì–¸íŠ¸ë¡œë¶€í„° ë°ì´í„°ë¥¼ ë°›ìŒ.
 			network->Recv(clientInformation.Socket, (char*)recvBuffer, recvBufferSize);
 			
 			if (network->retval == SOCKET_ERROR) {
@@ -251,7 +251,7 @@ DWORD CommunicationThreadProc(LPVOID arg)
 				outNickName.assign(std::begin(((ClientToServerInLogin*)recvBuffer)->NickName), std::end(((ClientToServerInLogin*)recvBuffer)->NickName));
 				if (!(((ClientToServerInLogin*)recvBuffer)->NickName[0] == 0))
 				{
-					sprintf(logRecvbuffer, "%d¹ÙÀÌÆ® ¹ŞÀ½        NickName : %s", network->retval, outNickName.c_str());
+					sprintf(logRecvbuffer, "%dë°”ì´íŠ¸ ë°›ìŒ        NickName : %s", network->retval, outNickName.c_str());
 					Log(g_ClientAddress[clientInformation.ID], logRecvbuffer);
 				}
 				break;
@@ -262,7 +262,7 @@ DWORD CommunicationThreadProc(LPVOID arg)
 				outChat.assign(std::begin(((ClientToServerInLobby*)recvBuffer)->Chat), std::end(((ClientToServerInLobby*)recvBuffer)->Chat));
 				if (!(((ClientToServerInLobby*)recvBuffer)->Chat[0] == 0))
 				{
-					sprintf(logRecvbuffer, "%d¹ÙÀÌÆ® ¹ŞÀ½        Chat : %s", network->retval, outChat.c_str());
+					sprintf(logRecvbuffer, "%dë°”ì´íŠ¸ ë°›ìŒ        Chat : %s", network->retval, outChat.c_str());
 					Log(g_ClientAddress[clientInformation.ID], logRecvbuffer);
 				}
 				break;
@@ -310,7 +310,7 @@ DWORD CommunicationThreadProc(LPVOID arg)
 						break;
 					}
 
-					sprintf(logRecvbuffer, "%d¹ÙÀÌÆ® ¹ŞÀ½        %s        %s", network->retval, actionInfo, keyInfo);
+					sprintf(logRecvbuffer, "%dë°”ì´íŠ¸ ë°›ìŒ        %s        %s", network->retval, actionInfo, keyInfo);
 					Log(g_ClientAddress[clientInformation.ID], logRecvbuffer);
 				}
 			}
@@ -320,15 +320,15 @@ DWORD CommunicationThreadProc(LPVOID arg)
 			
 
 
-			// µ¥ÀÌÅÍ¸¦ Queue¿¡ ³ÖÀ½.
+			// ë°ì´í„°ë¥¼ Queueì— ë„£ìŒ.
 			g_DataQueue.push(recvBuffer);
 
 
-			// ·ÎÁ÷ÀÌ °è»êµÉ ¶§±îÁö ±â´Ù¸².
+			// ë¡œì§ì´ ê³„ì‚°ë  ë•Œê¹Œì§€ ê¸°ë‹¤ë¦¼.
 			if (g_ClientEvents[recvBuffer->ID])
 				WaitForSingleObject(g_ClientEvents[recvBuffer->ID], INFINITE);
 
-			// °è»êµÈ µ¥ÀÌÅÍ¸¦ º¸³¿
+			// ê³„ì‚°ëœ ë°ì´í„°ë¥¼ ë³´ëƒ„
 			if (recvBuffer)
 			{
 				if (g_ProcessedData[recvBuffer->ID])
@@ -371,13 +371,13 @@ DWORD CommunicationThreadProc(LPVOID arg)
 						case LoginResult::None:
 							break;
 						case LoginResult::Succeded:
-							sprintf(resultBuffer, "Result : ¼º°ø!");
-							sprintf(logSendBuffer, "%d¹ÙÀÌÆ® º¸³¿        %s", sendBufferSize, resultBuffer);
+							sprintf(resultBuffer, "Result : ì„±ê³µ!");
+							sprintf(logSendBuffer, "%dë°”ì´íŠ¸ ë³´ëƒ„        %s", sendBufferSize, resultBuffer);
 							Log(g_ClientAddress[clientInformation.ID], logSendBuffer);
 							break;
 						case LoginResult::Failed:
-							sprintf(resultBuffer, "Result : ½ÇÆĞ!");
-							sprintf(logSendBuffer, "%d¹ÙÀÌÆ® º¸³¿       %s", sendBufferSize, resultBuffer);
+							sprintf(resultBuffer, "Result : ì‹¤íŒ¨!");
+							sprintf(logSendBuffer, "%dë°”ì´íŠ¸ ë³´ëƒ„       %s", sendBufferSize, resultBuffer);
 							Log(g_ClientAddress[clientInformation.ID], logSendBuffer);
 							break;
 						default:
@@ -407,12 +407,12 @@ DWORD CommunicationThreadProc(LPVOID arg)
 
 							if (bShouldStartMatch)
 							{
-								sprintf(logSendBuffer, "%d¹ÙÀÌÆ® º¸³¿       %s        ¸ÅÄªÀ» ½ÃÀÛ ÇØ¾ßÇÏ´Â°¡ : True", sendBufferSize, cChatInfo.c_str());
+								sprintf(logSendBuffer, "%dë°”ì´íŠ¸ ë³´ëƒ„       %s        ë§¤ì¹­ì„ ì‹œì‘ í•´ì•¼í•˜ëŠ”ê°€ : True", sendBufferSize, cChatInfo.c_str());
 								Log(g_ClientAddress[clientInformation.ID], logSendBuffer);
 							}
 							else
 							{
-								sprintf(logSendBuffer, "%d¹ÙÀÌÆ® º¸³¿       %s        ¸ÅÄªÀ» ½ÃÀÛ ÇØ¾ßÇÏ´Â°¡ : False", sendBufferSize, cChatInfo.c_str());
+								sprintf(logSendBuffer, "%dë°”ì´íŠ¸ ë³´ëƒ„       %s        ë§¤ì¹­ì„ ì‹œì‘ í•´ì•¼í•˜ëŠ”ê°€ : False", sendBufferSize, cChatInfo.c_str());
 								Log(g_ClientAddress[clientInformation.ID], logSendBuffer);
 							}
 						}
@@ -433,7 +433,7 @@ DWORD CommunicationThreadProc(LPVOID arg)
 						char logScoreBuffer[100];
 						sprintf(logScoreBuffer, "Left Team Score : %d, Right Team Score : %d", scores[0], scores[1]);
 
-						sprintf(logSendBuffer, "%d¹ÙÀÌÆ® º¸³¿       %s        %s", sendBufferSize, logPositionBuffer, logScoreBuffer);
+						sprintf(logSendBuffer, "%dë°”ì´íŠ¸ ë³´ëƒ„       %s        %s", sendBufferSize, logPositionBuffer, logScoreBuffer);
 						Log(g_ClientAddress[clientInformation.ID], logSendBuffer);
 						break;
 					}

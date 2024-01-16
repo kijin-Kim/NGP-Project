@@ -24,13 +24,13 @@ public:
 		FT_Library ft;
 		if (FT_Init_FreeType(&ft))
 		{
-			assert(false && "FreeType ¶óÀÌºê·¯¸®¸¦ ºÒ·¯¿À´Âµ¥ ½ÇÆĞÇÏ¿´½À´Ï´Ù.");
+			assert(false && "FreeType ë¼ì´ë¸ŒëŸ¬ë¦¬ë¥¼ ë¶ˆëŸ¬ì˜¤ëŠ”ë° ì‹¤íŒ¨í•˜ì˜€ìŠµë‹ˆë‹¤.");
 		}
 
 		FT_Face face;
 		if (FT_New_Face(ft, filePath.c_str(), 0, &face))
 		{
-			assert(false && "Font¸¦ ºÒ·¯¿À´Âµ¥ ½ÇÆĞÇÏ¿´½À´Ï´Ù.");
+			assert(false && "Fontë¥¼ ë¶ˆëŸ¬ì˜¤ëŠ”ë° ì‹¤íŒ¨í•˜ì˜€ìŠµë‹ˆë‹¤.");
 		}
 		FT_Set_Pixel_Sizes(face, 0, size);
 
@@ -39,7 +39,7 @@ public:
 			// load character glyph 
 			if (FT_Load_Char(face, c, FT_LOAD_RENDER))
 			{
-				assert(false && "Glyph¸¦ ºÒ·¯¿À´Âµ¥ ½ÇÆĞÇÏ¿´½À´Ï´Ù.");
+				assert(false && "Glyphë¥¼ ë¶ˆëŸ¬ì˜¤ëŠ”ë° ì‹¤íŒ¨í•˜ì˜€ìŠµë‹ˆë‹¤.");
 			}
 			// generate texture
 			unsigned int texture;
@@ -89,7 +89,7 @@ public:
 	{
 		auto it = m_FontCache.find(c);
 		if (it == m_FontCache.end())
-			assert(false && "Character¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+			assert(false && "Characterë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
 
 		return (*it).second;
 	}

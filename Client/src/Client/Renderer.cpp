@@ -46,15 +46,15 @@ Renderer::Renderer(int width, int height)
 
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_BufferIDs[0]);
-	// ¹öÆÛÀÇ Ã¹¹øÂ° ¼Ó¼º°ª(attribute) : ¹öÅØ½ºµé
+	// ë²„í¼ì˜ ì²«ë²ˆì§¸ ì†ì„±ê°’(attribute) : ë²„í…ìŠ¤ë“¤
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(
-		0,                  // 0¹øÂ° ¼Ó¼º(attribute). 0 ÀÌ µÉ Æ¯º°ÇÑ ÀÌÀ¯´Â ¾øÁö¸¸, ½¦ÀÌ´õÀÇ ·¹ÀÌ¾Æ¿ô(layout)¿Í ¹İµå½Ã ¸ÂÃß¾î¾ß ÇÕ´Ï´Ù.
-		3,                  // Å©±â(size)
-		GL_FLOAT,           // Å¸ÀÔ(type)
-		GL_FALSE,           // Á¤±ÔÈ­(normalized)?
-		0,                  // ´ÙÀ½ ¿ä¼Ò ±îÁö °£°İ(stride)
-		(void*)0            // ¹è¿­ ¹öÆÛÀÇ ¿ÀÇÁ¼Â(offset; ¿Å±â´Â °ª)
+		0,                  // 0ë²ˆì§¸ ì†ì„±(attribute). 0 ì´ ë  íŠ¹ë³„í•œ ì´ìœ ëŠ” ì—†ì§€ë§Œ, ì‰ì´ë”ì˜ ë ˆì´ì•„ì›ƒ(layout)ì™€ ë°˜ë“œì‹œ ë§ì¶”ì–´ì•¼ í•©ë‹ˆë‹¤.
+		3,                  // í¬ê¸°(size)
+		GL_FLOAT,           // íƒ€ì…(type)
+		GL_FALSE,           // ì •ê·œí™”(normalized)?
+		0,                  // ë‹¤ìŒ ìš”ì†Œ ê¹Œì§€ ê°„ê²©(stride)
+		(void*)0            // ë°°ì—´ ë²„í¼ì˜ ì˜¤í”„ì…‹(offset; ì˜®ê¸°ëŠ” ê°’)
 	);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_BufferIDs[1]);

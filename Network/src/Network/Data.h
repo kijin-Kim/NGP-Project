@@ -24,9 +24,9 @@ enum BallState
 #pragma pack(push)
 #pragma pack(1)
 
-struct IData  //µ¥ÀÌÅÍµéÀ» ÇÏ³ªÀÇ ÄÁÅ×ÀÌ³Ê¿¡ ³Ö±â À§ÇÑ ÀÎÅÍÆäÀÌ½º Å¬·¡½º
+struct IData  //ë°ì´í„°ë“¤ì„ í•˜ë‚˜ì˜ ì»¨í…Œì´ë„ˆì— ë„£ê¸° ìœ„í•œ ì¸í„°í˜ì´ìŠ¤ í´ë˜ìŠ¤
 {
-	int8_t ID = -1;        //Å¬¶óÀÌ¾ğÆ®¸¦ ±¸ºĞÇÏ±â À§ÇÑ id
+	int8_t ID = -1;        //í´ë¼ì´ì–¸íŠ¸ë¥¼ êµ¬ë¶„í•˜ê¸° ìœ„í•œ id
 };
 
 
@@ -36,11 +36,11 @@ struct IData  //µ¥ÀÌÅÍµéÀ» ÇÏ³ªÀÇ ÄÁÅ×ÀÌ³Ê¿¡ ³Ö±â À§ÇÑ ÀÎÅÍÆäÀÌ½º Å¬·¡½º
 
 struct UserInput
 {
-	int32_t Key; //Å¬¶óÀÌ¾ğÆ®ÀÇ ÀÔ·Â °ª
-	uint8_t Action; //Å¬¶óÀÌ¾ğÆ®ÀÇ ÀÔ·Â °ª »óÅÂ PRESSED, RELEASED, REPEATED
+	int32_t Key; //í´ë¼ì´ì–¸íŠ¸ì˜ ì…ë ¥ ê°’
+	uint8_t Action; //í´ë¼ì´ì–¸íŠ¸ì˜ ì…ë ¥ ê°’ ìƒíƒœ PRESSED, RELEASED, REPEATED
 };
 
-struct ClientToServerInGame : public IData //¼­¹ö°¡ °ÔÀÓ¿¡¼­ Client¿¡°Ô ³Ñ°ÜÁÙ(Client°¡ ·»´õ¸µÇÒ¶§ ÇÊ¿äÇÑ) µ¥ÀÌÅÍ¸¦ °è»êÇÏ±â À§ÇØ ÇÊ¿äÇÑ µ¥ÀÌÅÍ
+struct ClientToServerInGame : public IData //ì„œë²„ê°€ ê²Œì„ì—ì„œ Clientì—ê²Œ ë„˜ê²¨ì¤„(Clientê°€ ë Œë”ë§í• ë•Œ í•„ìš”í•œ) ë°ì´í„°ë¥¼ ê³„ì‚°í•˜ê¸° ìœ„í•´ í•„ìš”í•œ ë°ì´í„°
 {
 	UserInput Input;
 };
@@ -54,16 +54,16 @@ struct float2
 
 struct Animation
 {
-	uint8_t State;  // Æ¯Á¤ ¿ÀºêÁ§Æ®ÀÇ »óÅÂ(¿¹) Á¡ÇÁ, ½½¶óÀÌµù, Idle µî)
-	uint8_t AnimationIndex; //Æ¯Á¤ »óÅÂ¿¡¼­ Ãâ·ÂÇØ¾ßµÇ´Â 2D ½ºÇÁ¶óÀÌÆ®ÀÇ ÀÎµ¦½º
+	uint8_t State;  // íŠ¹ì • ì˜¤ë¸Œì íŠ¸ì˜ ìƒíƒœ(ì˜ˆ) ì í”„, ìŠ¬ë¼ì´ë”©, Idle ë“±)
+	uint8_t AnimationIndex; //íŠ¹ì • ìƒíƒœì—ì„œ ì¶œë ¥í•´ì•¼ë˜ëŠ” 2D ìŠ¤í”„ë¼ì´íŠ¸ì˜ ì¸ë±ìŠ¤
 };
 
-struct ServerToClientInGame : public IData //Client°¡ °ÔÀÓÀ» ·»´õ¸µÇÒ ¶§ ÇÊ¿äÇÑ °è»êµÈ µ¥ÀÌÅÍ
+struct ServerToClientInGame : public IData //Clientê°€ ê²Œì„ì„ ë Œë”ë§í•  ë•Œ í•„ìš”í•œ ê³„ì‚°ëœ ë°ì´í„°
 {
-	float2 ObjectPositions[5]; //°ÔÀÓ³»ÀÇ ¸ğµç ¿ÀºêÁ§Æ®ÀÇ À§Ä¡(ÇÃ·¹ÀÌ¾î 4¸í, °ø 1°³)
-	uint8_t Scores[2];     //°ÔÀÓ³»ÀÇ ÆÀÀÇ Á¡¼ö(¼ø¼­´ë·Î ÁÂÃø ÆÀ, ¿ìÃø ÆÀ)
-	Animation AnimationData[5];  //¾Ö´Ï¸ŞÀÌ¼Ç µ¥ÀÌÅÍ
-	bool bLeftTeamWon = false; // °ÔÀÓÀÌ ³¡³µÀ» ¶§ (¾î´À ÇÑ ÂÊÆÀÀÌ ¸ñÇ¥Á¡¼ö¿¡ µµ´ŞÇÏ¿´À» ¶§), È®ÀÎÇÏ´Â Boolean, True ¿ŞÂÊÆÀ ½Â¸® False ¿À¸¥ÂÊÆÀ ½Â¸®
+	float2 ObjectPositions[5]; //ê²Œì„ë‚´ì˜ ëª¨ë“  ì˜¤ë¸Œì íŠ¸ì˜ ìœ„ì¹˜(í”Œë ˆì´ì–´ 4ëª…, ê³µ 1ê°œ)
+	uint8_t Scores[2];     //ê²Œì„ë‚´ì˜ íŒ€ì˜ ì ìˆ˜(ìˆœì„œëŒ€ë¡œ ì¢Œì¸¡ íŒ€, ìš°ì¸¡ íŒ€)
+	Animation AnimationData[5];  //ì• ë‹ˆë©”ì´ì…˜ ë°ì´í„°
+	bool bLeftTeamWon = false; // ê²Œì„ì´ ëë‚¬ì„ ë•Œ (ì–´ëŠ í•œ ìª½íŒ€ì´ ëª©í‘œì ìˆ˜ì— ë„ë‹¬í•˜ì˜€ì„ ë•Œ), í™•ì¸í•˜ëŠ” Boolean, True ì™¼ìª½íŒ€ ìŠ¹ë¦¬ False ì˜¤ë¥¸ìª½íŒ€ ìŠ¹ë¦¬
 };
 
 
@@ -73,7 +73,7 @@ struct ServerToClientInGame : public IData //Client°¡ °ÔÀÓÀ» ·»´õ¸µÇÒ ¶§ ÇÊ¿äÇÑ 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-struct ClientToServerInLobby : public IData  //¼­¹ö°¡ ·Îºñ¿¡¼­ Client¿¡°Ô ³Ñ°ÜÁÙ(Client°¡ ·»´õ¸µÇÒ¶§ ÇÊ¿äÇÑ) µ¥ÀÌÅÍ¸¦ °è»êÇÏ±â À§ÇØ ÇÊ¿äÇÑ µ¥ÀÌÅÍ
+struct ClientToServerInLobby : public IData  //ì„œë²„ê°€ ë¡œë¹„ì—ì„œ Clientì—ê²Œ ë„˜ê²¨ì¤„(Clientê°€ ë Œë”ë§í• ë•Œ í•„ìš”í•œ) ë°ì´í„°ë¥¼ ê³„ì‚°í•˜ê¸° ìœ„í•´ í•„ìš”í•œ ë°ì´í„°
 {
 	wchar_t Chat[256] = {};
 };
@@ -83,7 +83,7 @@ struct ChatLine
 	wchar_t Line[50] = {};
 };
 
-struct ServerToClientInLobby : public IData //Client°¡ ·Îºñ¸¦ ·»´õ¸µÇÒ ¶§ ÇÊ¿äÇÑ °è»êµÈ µ¥ÀÌÅÍ
+struct ServerToClientInLobby : public IData //Clientê°€ ë¡œë¹„ë¥¼ ë Œë”ë§í•  ë•Œ í•„ìš”í•œ ê³„ì‚°ëœ ë°ì´í„°
 {
 	ChatLine Chats[16] = {};
 	bool bShouldStartMatch = false;
@@ -96,11 +96,11 @@ struct ServerToClientInLobby : public IData //Client°¡ ·Îºñ¸¦ ·»´õ¸µÇÒ ¶§ ÇÊ¿äÇÑ
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-struct ClientToServerInLogin : public IData //Å¬¶óÀÌ¾ğÆ®°¡ ¼­¹ö¿¡°Ô º¸³¾ ´Ğ³×ÀÓ
+struct ClientToServerInLogin : public IData //í´ë¼ì´ì–¸íŠ¸ê°€ ì„œë²„ì—ê²Œ ë³´ë‚¼ ë‹‰ë„¤ì„
 {
 	wchar_t NickName[20] = {};
 };
-struct ServerToClientInLogin : public IData //¼­¹ö°¡ Å¬¶óÀÌ¾ğÆ®¿¡°Ô º¸³»´Â ·Î±×ÀÎ ¼º°ø¿©ºÎ(Áßº¹ ½Ã, ½ÇÆĞ)
+struct ServerToClientInLogin : public IData //ì„œë²„ê°€ í´ë¼ì´ì–¸íŠ¸ì—ê²Œ ë³´ë‚´ëŠ” ë¡œê·¸ì¸ ì„±ê³µì—¬ë¶€(ì¤‘ë³µ ì‹œ, ì‹¤íŒ¨)
 {
 	LoginResult Result = None;
 };

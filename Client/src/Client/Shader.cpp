@@ -36,7 +36,7 @@ std::string Shader::readShaderFile(const std::string& filePath)
 {
 	std::filesystem::path p(filePath);
 	bool bIsExist = std::filesystem::exists(p);
-	assert(bIsExist && "¼ÎÀÌ´õ ÆÄÀÏÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+	assert(bIsExist && "ì…°ì´ë” íŒŒì¼ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
 
 	int fileSize = std::filesystem::file_size(p);
 
@@ -78,7 +78,7 @@ unsigned int Shader::compileShader(const std::string& src, unsigned int glShader
 		// Use the infoLog as you see fit.
 
 		// In this simple program, we'll just leave
-		assert(false && "Á¤Á¡ ¼ÎÀÌ´õ¸¦ »ı¼ºÇÏ´Âµ¥ ½ÇÆĞÇÏ¿´½À´Ï´Ù.");
+		assert(false && "ì •ì  ì…°ì´ë”ë¥¼ ìƒì„±í•˜ëŠ”ë° ì‹¤íŒ¨í•˜ì˜€ìŠµë‹ˆë‹¤.");
 	}
 
 	return shader;
@@ -119,7 +119,7 @@ unsigned int Shader::createShaderProgram(unsigned int vertexID, unsigned int fra
 		// Use the infoLog as you see fit.
 
 		// In this simple program, we'll just leave
-		assert(false && "¼ÎÀÌ´õ ÇÁ·Î±×·¥À» »ı¼ºÇÏ´Âµ¥ ½ÇÆĞÇÏ¿´½À´Ï´Ù.");
+		assert(false && "ì…°ì´ë” í”„ë¡œê·¸ë¨ì„ ìƒì„±í•˜ëŠ”ë° ì‹¤íŒ¨í•˜ì˜€ìŠµë‹ˆë‹¤.");
 
 	}
 
