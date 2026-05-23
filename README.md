@@ -1,74 +1,104 @@
-# 멀티플레이어 피카츄 배구 게임 (NGP-Project)
+# Pikachu Volleyball - Multiplayer Game
 
-이 프로젝트는 2020년 2학기 네트워크 게임 프로그래밍 수업에서 진행한 팀 프로젝트입니다. Winsock과 OpenGL API를 직접 사용하여 2v2 실시간 온라인 피카츄 배구 게임을 C++로 구현했습니다. 네트워크 동기화, 그래픽스 렌더링 파이프라인, 게임 로직 등 멀티플레이어 게임의 핵심 요소를 직접 구현하며 학습하는 것을 목표로 했습니다.
+> C++ / OpenGL / Winsock 으로 엔진 없이 구현한 2v2 멀티플레이 피카츄 배구 게임
+---
+
+## 플레이 영상
+
+https://github.com/user-attachments/assets/7f509ddb-ff0e-4dba-a384-b0a7caeb8bc2
+
+## 채팅
+
+https://github.com/user-attachments/assets/8bc3fdb8-d012-4162-8c72-037a08152230
 
 
-## 주요 기능
 
-* **실시간 2v2 멀티플레이:** Winsock(TCP) 기반 최대 4인 동시 접속 및 플레이 지원
-* **핵심 게임 로직:** 캐릭터 이동, 점프, 기본 공격, 파워 히트(스파이크), 공 물리(중력 적용), 충돌 처리(AABB) 구현
-* **게임 상태 관리:** 로그인 - 로비(채팅 기능 포함) - 인게임 상태 전환 관리
-* **2D 그래픽스 렌더링:** OpenGL Core Profile 기반 렌더링
+## Summary
 
-## 기술 스택
+게임 엔진을 사용하지 않고 **OpenGL과 Winsock으로 클라이언트와 서버를 모두 구현한 멀티플레이 게임**입니다.  
+2D 렌더링 파이프라인, TCP 네트워크 통신, 멀티스레드 동기화, 게임 상태 관리까지 전 영역을 설계했습니다.
 
-* **언어:** C++
-* **네트워킹:** Winsock (TCP/IP)
-* **그래픽스:** OpenGL 4.x (Core Profile), GLEW, GLFW
-* **라이브러리:**
-    * GLM (수학)
-    * FreeType (폰트 렌더링)
-    * JsonCpp (Texture Atlas 정보 파싱)
-    * stb_image (이미지 로딩)
-* **서버 기술:** Windows Threads, Critical Sections (동기화)
-* **개발 환경:** Windows, Visual Studio
+---
 
-## 아키텍처 개요
+## 핵심 기능
 
-### 클라이언트-서버 구조
+### 1. OpenGL 기반 2D 렌더링 시스템 구현
 
-* TCP/IP 소켓 통신을 기반으로 하는 클라이언트-서버 모델입니다.
-* **서버 권위(Server-Authoritative)** 구조: 모든 게임 로직 연산(이동, 충돌, 점수 등)은 서버에서 수행되며, 클라이언트는 서버로부터 받은 상태 정보를 기반으로 렌더링합니다.
+엔진의 추상화 없이 **OpenGL 4.0 코어 프로파일을 사용해 2D 렌더러를 처음부터 구현**했습니다.
 
-### 서버 (`Server/`)
+**구현 내용**
+- VAO/VBO/EBO 버퍼 관리 및 Shader 파이프라인 구축
+- Quad 단위 렌더링 추상화 (`Renderer::DrawQuad`)
+- **텍스처 아틀라스 시스템** - JSON 메타데이터를 파싱해 단일 텍스처에서 여러 스프라이트 추출
+- **FreeType 기반 폰트 렌더링** - 한글 포함 비트맵 폰트 캐싱
+- 직교 투영(Orthographic Projection)으로 픽셀 단위 2D 좌표계 구성
 
-* **멀티쓰레딩:** Listening 쓰레드가 클라이언트 연결을 수락하고, 각 클라이언트마다 별도의 Communication 쓰레드를 생성하여 통신을 담당합니다 ([`Server/src/main.cpp`](https://github.com/kijin-Kim/NGP-Project/blob/master/Server/src/main.cpp)).
-* **중앙 처리 및 상태 관리:** 서버의 메인 쓰레드가 전역 큐(`g_DataQueue`)를 통해 모든 클라이언트의 요청을 순차적으로 처리합니다. State 패턴을 사용하여 Login, Lobby, Game 상태별 로직을 관리합니다 ([`Server/src/State.h`](https://github.com/kijin-Kim/NGP-Project/blob/master/Server/src/State.h), [`Server/src/main.cpp`](https://github.com/kijin-Kim/NGP-Project/blob/master/Server/src/main.cpp)).
-* **동기화:** Critical Section과 Event 객체를 사용하여 쓰레드 간 공유 자원 접근 및 작업 흐름을 제어합니다.
+**관련 코드**
+- [`Client/src/Client/Renderer.cpp`](Client/src/Client/Renderer.cpp)
+- [`Client/src/Client/TextureManager.h`](Client/src/Client/TextureManager.h)
 
-### 클라이언트 (`Client/`)
+---
 
-* **상태 관리:** 서버와 동일하게 Login, Lobby, Game 상태를 가지며, 각 상태에 맞는 UI 렌더링 및 서버 통신 로직을 수행합니다 ([`Client/src/Script/PikachuVolleyBall.cpp`](https://github.com/kijin-Kim/NGP-Project/blob/master/Client/src/Script/PikachuVolleyBall.cpp)).
-* **렌더링 파이프라인:** OpenGL API를 직접 사용하여 2D 렌더링 시스템을 구축했습니다.
-    * `Renderer` 클래스: 셰이더 관리, 버텍스 버퍼 설정, 드로우 콜 등 핵심 렌더링 로직 담당 ([`Client/src/Client/Renderer.cpp`](https://github.com/kijin-Kim/NGP-Project/blob/master/Client/src/Client/Renderer.cpp)).
-    * `TextureManager`: Texture Atlas(Json) 및 이미지 파일 로딩/관리 ([`Client/src/Client/TextureManager.h`](https://github.com/kijin-Kim/NGP-Project/blob/master/Client/src/Client/TextureManager.h)).
-    * `FontData`: FreeType 라이브러리를 이용한 폰트 렌더링 지원 ([`Client/src/Client/FontData.h`](https://github.com/kijin-Kim/NGP-Project/blob/master/Client/src/Client/FontData.h)).
+### 2. 클라이언트-서버 네트워크 아키텍처 (Winsock2 + TCP)
 
-### 네트워크 (`Network/`)
+**서버를 구현하고**, 클라이언트와 통신할 패킷 구조를 설계했습니다.
 
-* Winsock API를 캡슐화한 `Network` 클래스 제공 ([`Network/src/Network/Network.h`](https://github.com/kijin-Kim/NGP-Project/blob/master/Network/src/Network/Network.h)).
-* `#pragma pack(1)`을 사용하여 클라이언트-서버 간 통신에 사용될 패킷 구조체 정의 ([`Network/src/Network/Data.h`](https://github.com/kijin-Kim/NGP-Project/blob/master/Network/src/Network/Data.h)).
+**구현 내용**
+- TCP 소켓 통신 (`Network` 싱글톤으로 송수신 추상화)
+- **상태별 패킷 구조 설계** - Login / Lobby / Game 각각의 패킷을 `IData` 인터페이스로 추상화
+- `#pragma pack(1)` 으로 패킷 메모리 정렬 명시 → 네트워크 전송 시 패딩 이슈 제거
+- 클라이언트 → 서버: 입력값(UserInput) 전송
+- 서버 → 클라이언트: 계산된 오브젝트 위치 + 애니메이션 상태 전송
 
-## 시작하기 (Getting Started)
+**설계 포인트**
+- 서버를 권위 서버(Authoritative Server)로 두어 모든 게임 로직 계산을 서버에서 수행
+- 클라이언트는 입력 전송 + 결과 렌더링만 담당 → 치팅 방지 + 동기화 단순화
 
-### 준비물
+**관련 코드 및 문서**
+- [NGP 프로젝트 추진 계획서.pdf](https://github.com/user-attachments/files/28174538/NGP.pdf)
+- [`Network/src/Network/Data.h`](https://github.com/kijin-Kim/NGP-Project/blob/6f86fbdfbdbe67556b95b006a836c403f3e86bd0/Network/src/Network/Data.h#L61) - 패킷 구조 정의
+- [`Server/src/main.cpp`](https://github.com/kijin-Kim/NGP-Project/blob/6f86fbdfbdbe67556b95b006a836c403f3e86bd0/Server/src/main.cpp#L51) - 서버 메인 루프
 
-* Windows 운영체제
-* Visual Studio
+---
 
-### 빌드 방법
+### 3. 멀티스레드 서버 구조 (Critical Section + Event)
 
-1.  이 저장소를 클론합니다: `git clone https://github.com/kijin-Kim/NGP-Project.git`
-2.  Visual Studio에서 솔루션 파일을 엽니다.
-3.  솔루션 탐색기에서 `Server` 프로젝트와 `Client` 프로젝트를 각각 빌드합니다 (Debug 또는 Release 모드 선택).
+최대 4명의 동시 접속을 처리하기 위해 **스레드 기반 서버**를 구현했습니다.
 
-### 실행 방법
+**스레드 구조**
+- **Listening Thread**: 신규 클라이언트 접속 대기 (4명 차면 종료)
+- **Communication Thread** (클라이언트당 1개): 데이터 송수신 전담
+- **Main Thread**: 16ms 틱(60FPS) 단위로 게임 로직 처리
 
-1.  빌드된 `Server.exe` 파일을 먼저 실행합니다. 서버가 클라이언트 접속을 대기합니다.
-2.  빌드된 `Client.exe` 파일을 실행합니다. 필요한 경우 서버 IP 주소를 인자로 전달할 수 있습니다. (로컬 테스트 시: `Client.exe 127.0.0.1`)
-3.  최대 4개의 클라이언트까지 접속하여 로그인 후 로비에서 대기합니다. 4명이 모두 접속하면 자동으로 게임이 시작됩니다.
+**동기화 처리**
+- `CRITICAL_SECTION`으로 공유 큐(`g_DataQueue`)와 상태 배열(`g_ClientStates`) 보호
+- `Event` 객체로 데이터 처리 완료 시점을 통신 스레드에 통지 (`SetEvent` / `WaitForSingleObject`)
+- 클라이언트 상태(Login/Lobby/Game)에 따라 패킷 크기를 동적으로 결정
 
-## 알려진 이슈 / 개선점 (Optional)
+**관련 코드**
+- [`Server/src/main.cpp - ListeningThreadProc`](https://github.com/kijin-Kim/NGP-Project/blob/6f86fbdfbdbe67556b95b006a836c403f3e86bd0/Server/src/main.cpp#L147),
+- [`Server/src/main.cpp - CommunicationThreadProc`](https://github.com/kijin-Kim/NGP-Project/blob/6f86fbdfbdbe67556b95b006a836c403f3e86bd0/Server/src/main.cpp#L179)
 
-* 현재 구현은 네트워크 지연 시간 보상(Client Side Prediction, Interpolation 등)을 고려하지 않아, 네트워크 환경에 따라 입력 반응성이 떨어질 수 있습니다.
-* 오류 처리 및 예외 처리가 부족할 수 있습니다.
+---
+
+### 4. State 패턴 기반 게임 흐름 관리
+
+게임의 3가지 단계를 **State 패턴**으로 분리해 클라이언트와 서버 양쪽에 일관되게 적용했습니다.
+
+**상태 구조**
+```
+Login (닉네임 입력)  →  Lobby (채팅 / 매칭 대기)  →  Game (인게임 플레이)
+```
+
+**구현 내용**
+- 추상 클래스 `State`에 `SendData()`, `ReceiveData()`, `Render()` 정의
+- 각 상태(`LoginState`, `LobbyState`, `GameState`)가 자신의 패킷 처리와 렌더링을 캡슐화
+- 상태 전환 시 `Game::SetGameState()` 한 줄로 전체 흐름 교체
+
+**얻은 이점**
+- 신규 상태 추가 시 기존 코드 수정 최소화
+
+**관련 코드**
+- [`Client/src/Client/State.h`](https://github.com/kijin-Kim/NGP-Project/blob/6f86fbdfbdbe67556b95b006a836c403f3e86bd0/Server/src/State.h#L10)
+
+---
